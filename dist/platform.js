@@ -7,6 +7,7 @@ exports.AirdogPlatform = void 0;
 const md5_1 = require("ts-md5/dist/md5");
 const axios_1 = __importDefault(require("axios"));
 const rxjs_1 = require("rxjs");
+const operators_1 = require("rxjs/operators");
 /**
  * HomebridgePlatform
  * This class is the main constructor for your plugin, this is where you should
@@ -21,6 +22,9 @@ class AirdogPlatform {
         this.Characteristic = this.api.hap.Characteristic;
         // this is used to track restored cached accessories
         this.accessories = [];
+        this.id = '';
+        this.token = '';
+        this.userNo = '';
         this.log.debug('Finished initializing platform:', this.config.name);
         console.log(this.config);
         // When this event is fired it means Homebridge has restored all cached accessories from disk.
@@ -48,13 +52,17 @@ class AirdogPlatform {
      * must not be registered again to prevent "duplicate UUID" errors.
      */
     discoverDevices() {
-        let devices = rxjs_1.from(axios_1.default.post('http://app.us.beiangkeji.com:9011/challenger/app/login/appId/I0I000I000I00100', {
+        rxjs_1.from(axios_1.default.post('http://app.us.beiangkeji.com:9011/challenger/app/login/appId/I0I000I000I00100', {
             loginName: this.config.email,
             password: md5_1.Md5.hashStr(this.config.password).toString().toUpperCase(),
             clientType: 'iOS',
             clientId: '7b741e1e24b2d4a024d42740173e365f',
             language: 'en',
         }))
+            .pipe(operators_1.map(data => data.data), operators_1.tap((d) => this.id = d.id), operators_1.tap((d) => this.userNo = d.userNo), operators_1.tap((d) => this.token = d.token), operators_1.mergeMap(d => rxjs_1.from(axios_1.default.get(`http://app.us.beiangkeji.com:9011/challenger/app/virifyToken/appId/I0I000I000I00100/token/${this.token}/language/en`))), operators_1.map(data => data.data), operators_1.tap((d) => this.id = d.id), operators_1.mergeMap(() => rxjs_1.from(axios_1.default.post(`http://app.us.beiangkeji.com:9001/columbia/app/searchUserDevice/appId/I0I000I000I00100/token/${this.token}`, {
+            userId: this.userNo,
+            language: 'en',
+        }))))
             .subscribe(d => console.log(d.data));
         return;
         /*
@@ -71,32 +79,32 @@ class AirdogPlatform {
                 exampleDisplayName: 'Kitchen',
               },
             ];
-        
+    
             // loop over the discovered devices and register each one if it has not already been registered
             for (const device of exampleDevices) {
-        
+    
               // generate a unique id for the accessory this should be generated from
               // something globally unique, but constant, for example, the device serial
               // number or MAC address
               const uuid = this.api.hap.uuid.generate(device.exampleUniqueId);
-        
+    
               // see if an accessory with the same uuid has already been registered and restored from
               // the cached devices we stored in the `configureAccessory` method above
               const existingAccessory = this.accessories.find(accessory => accessory.UUID === uuid);
-        
+    
               if (existingAccessory) {
                 // the accessory already exists
                 if (device) {
                   this.log.info('Restoring existing accessory from cache:', existingAccessory.displayName);
-        
+    
                   // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. eg.:
                   // existingAccessory.context.device = device;
                   // this.api.updatePlatformAccessories([existingAccessory]);
-        
+    
                   // create the accessory handler for the restored accessory
                   // this is imported from `platformAccessory.ts`
                   new ExamplePlatformAccessory(this, existingAccessory);
-        
+    
                   // update accessory cache with any changes to the accessory details and information
                   this.api.updatePlatformAccessories([existingAccessory]);
                 } else if (!device) {
@@ -108,18 +116,18 @@ class AirdogPlatform {
               } else {
                 // the accessory does not yet exist, so we need to create it
                 this.log.info('Adding new accessory:', device.exampleDisplayName);
-        
+    
                 // create a new accessory
                 const accessory = new this.api.platformAccessory(device.exampleDisplayName, uuid);
-        
+    
                 // store a copy of the device object in the `accessory.context`
                 // the `context` property can be used to store any data about the accessory you may need
                 accessory.context.device = device;
-        
+    
                 // create the accessory handler for the newly create accessory
                 // this is imported from `platformAccessory.ts`
                 new ExamplePlatformAccessory(this, accessory);
-        
+    
                 // link the accessory to your platform
                 this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
               }

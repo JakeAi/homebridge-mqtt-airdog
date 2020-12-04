@@ -11,6 +11,9 @@ export declare class AirdogPlatform implements DynamicPlatformPlugin {
     readonly Service: typeof Service;
     readonly Characteristic: typeof Characteristic;
     readonly accessories: PlatformAccessory[];
+    private id;
+    private token;
+    private userNo;
     constructor(log: Logger, config: PlatformConfig, api: API);
     /**
      * This function is invoked when homebridge restores cached accessories from disk at startup.
