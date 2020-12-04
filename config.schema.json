@@ -8,8 +8,23 @@
       "name": {
         "title": "Name",
         "type": "string",
+        "default": "Nest",
         "required": true,
-        "default": "Example Dynamic Platform"
+        "description": "The name that will appear in your homebridge log"
+      },
+      "email": {
+        "title": "Email Address",
+        "type": "string",
+        "required": true,
+        "description": "Email for Airdog App.",
+        "placeholder": "john.doe@gmail.com"
+      },
+      "password": {
+        "title": "Password",
+        "type": "string",
+        "required": true,
+        "description": "Password for Airdog App.",
+        "placeholder": "*********"
       }
     }
   }

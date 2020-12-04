@@ -52,7 +52,7 @@ class AirdogPlatform {
             clientType: 'iOS',
             clientId: '7b741e1e24b2d4a024d42740173e365f',
             language: 'en',
-        })).subscribe(d => console.log(d));
+        })).subscribe(d => console.log(d.data));
         return;
         /*
             // EXAMPLE ONLY
