@@ -1,6 +1,7 @@
-import { Service, PlatformAccessory, CharacteristicValue, CharacteristicSetCallback, CharacteristicGetCallback } from 'homebridge';
+import { CharacteristicGetCallback, CharacteristicSetCallback, CharacteristicValue, PlatformAccessory, Service } from 'homebridge';
 
 import { AirdogPlatform } from './platform';
+import { MANUFACTURER } from './settings';
 
 /**
  * Platform Accessory
@@ -20,13 +21,13 @@ export class ExamplePlatformAccessory {
   };
 
   constructor(
-    private readonly platform: AirdogPlatform,
-    private readonly accessory: PlatformAccessory,
+    private  platform: AirdogPlatform,
+    private  accessory: PlatformAccessory,
   ) {
 
     // set accessory information
     this.accessory.getService(this.platform.Service.AccessoryInformation)!
-      .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Default-Manufacturer')
+      .setCharacteristic(this.platform.Characteristic.Manufacturer, MANUFACTURER)
       .setCharacteristic(this.platform.Characteristic.Model, 'Default-Model')
       .setCharacteristic(this.platform.Characteristic.SerialNumber, 'Default-Serial');
 
@@ -53,16 +54,16 @@ export class ExamplePlatformAccessory {
 
     /**
      * Creating multiple services of the same type.
-     * 
+     *
      * To avoid "Cannot add a Service with the same UUID another Service without also defining a unique 'subtype' property." error,
      * when creating multiple services of the same type, you need to use the following syntax to specify a name and subtype id:
      * this.accessory.getService('NAME') || this.accessory.addService(this.platform.Service.Lightbulb, 'NAME', 'USER_DEFINED_SUBTYPE_ID');
-     * 
+     *
      * The USER_DEFINED_SUBTYPE must be unique to the platform accessory (if you platform exposes multiple accessories, each accessory
      * can use the same sub type id.)
      */
 
-    // Example: add two "motion sensor" services to the accessory
+      // Example: add two "motion sensor" services to the accessory
     const motionSensorOneService = this.accessory.getService('Motion Sensor One Name') ||
       this.accessory.addService(this.platform.Service.MotionSensor, 'Motion Sensor One Name', 'YourUniqueIdentifier-1');
 
@@ -71,12 +72,12 @@ export class ExamplePlatformAccessory {
 
     /**
      * Updating characteristics values asynchronously.
-     * 
+     *
      * Example showing how to update the state of a Characteristic asynchronously instead
      * of using the `on('get')` handlers.
      * Here we change update the motion sensor trigger states on and off every 10 seconds
      * the `updateCharacteristic` method.
-     * 
+     *
      */
     let motionDetected = false;
     setInterval(() => {
@@ -110,10 +111,10 @@ export class ExamplePlatformAccessory {
   /**
    * Handle the "GET" requests from HomeKit
    * These are sent when HomeKit wants to know the current state of the accessory, for example, checking if a Light bulb is on.
-   * 
+   *
    * GET requests should return as fast as possbile. A long delay here will result in
    * HomeKit being unresponsive and a bad user experience in general.
-   * 
+   *
    * If your device takes time to respond you should update the status of your device
    * asynchronously instead using the `updateCharacteristic` method instead.
 
