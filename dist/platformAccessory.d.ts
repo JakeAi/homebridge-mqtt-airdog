@@ -1,5 +1,5 @@
 import { PlatformAccessory, CharacteristicValue, CharacteristicSetCallback, CharacteristicGetCallback } from 'homebridge';
-import { ExampleHomebridgePlatform } from './platform';
+import { AirdogPlatform } from './platform';
 /**
  * Platform Accessory
  * An instance of this class is created for each accessory your platform registers
@@ -14,7 +14,7 @@ export declare class ExamplePlatformAccessory {
      * You should implement your own code to track the state of your accessory
      */
     private exampleStates;
-    constructor(platform: ExampleHomebridgePlatform, accessory: PlatformAccessory);
+    constructor(platform: AirdogPlatform, accessory: PlatformAccessory);
     /**
      * Handle "SET" requests from HomeKit
      * These are sent when the user changes the state of an accessory, for example, turning on a Light bulb.

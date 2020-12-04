@@ -3,9 +3,18 @@
   <component name="ChangeListManager">
     <list default="true" id="7d60ea40-997e-4780-972a-017d9c9d0986" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/index.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/index.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/dist/index.js.map" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/platform.d.ts" beforeDir="false" afterPath="$PROJECT_DIR$/dist/platform.d.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/platform.d.ts.map" beforeDir="false" afterPath="$PROJECT_DIR$/dist/platform.d.ts.map" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/platform.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/platform.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/platform.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/dist/platform.js.map" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/platformAccessory.d.ts" beforeDir="false" afterPath="$PROJECT_DIR$/dist/platformAccessory.d.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/platformAccessory.d.ts.map" beforeDir="false" afterPath="$PROJECT_DIR$/dist/platformAccessory.d.ts.map" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/platformAccessory.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/dist/platformAccessory.js.map" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/platform.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/platform.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/platformAccessory.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/platformAccessory.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -34,7 +43,7 @@
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="settings.editor.selected.configurable" value="preferences.sourceCode.HTML" />
-    <property name="ts.external.directory.path" value="C:\Development\Node\homebridge-mqtt-airdog\node_modules\typescript\lib" />
+    <property name="ts.external.directory.path" value="$PROJECT_DIR$/node_modules/typescript/lib" />
     <property name="vue.rearranger.settings.migration" value="true" />
   </component>
   <component name="RunManager">
@@ -63,6 +72,7 @@
       <option name="presentableId" value="Default" />
       <updated>1607106117836</updated>
       <workItem from="1607106119023" duration="2951000" />
+      <workItem from="1607118753105" duration="661000" />
     </task>
     <servers />
   </component>
@@ -74,21 +84,25 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="740" y="275" key="FileChooserDialogImpl/-1920.0.1920.1040/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1607107771941" />
-    <state width="1899" height="102" key="GridCell.Tab.0.bottom" timestamp="1607107080128">
-      <screen x="0" y="0" width="1920" height="1040" />
+    <state width="1659" height="163" key="GridCell.Tab.0.bottom" timestamp="1607119386263">
+      <screen x="0" y="25" width="1680" height="961" />
     </state>
     <state width="1899" height="102" key="GridCell.Tab.0.bottom/-1920.0.1920.1040/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1607107080128" />
-    <state width="1899" height="102" key="GridCell.Tab.0.center" timestamp="1607107080128">
-      <screen x="0" y="0" width="1920" height="1040" />
+    <state width="1659" height="163" key="GridCell.Tab.0.bottom/0.25.1680.961@0.25.1680.961" timestamp="1607119386263" />
+    <state width="1659" height="163" key="GridCell.Tab.0.center" timestamp="1607119386262">
+      <screen x="0" y="25" width="1680" height="961" />
     </state>
     <state width="1899" height="102" key="GridCell.Tab.0.center/-1920.0.1920.1040/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1607107080128" />
-    <state width="1899" height="102" key="GridCell.Tab.0.left" timestamp="1607107080128">
-      <screen x="0" y="0" width="1920" height="1040" />
+    <state width="1659" height="163" key="GridCell.Tab.0.center/0.25.1680.961@0.25.1680.961" timestamp="1607119386262" />
+    <state width="1659" height="163" key="GridCell.Tab.0.left" timestamp="1607119386261">
+      <screen x="0" y="25" width="1680" height="961" />
     </state>
     <state width="1899" height="102" key="GridCell.Tab.0.left/-1920.0.1920.1040/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1607107080128" />
-    <state width="1899" height="102" key="GridCell.Tab.0.right" timestamp="1607107080128">
-      <screen x="0" y="0" width="1920" height="1040" />
+    <state width="1659" height="163" key="GridCell.Tab.0.left/0.25.1680.961@0.25.1680.961" timestamp="1607119386261" />
+    <state width="1659" height="163" key="GridCell.Tab.0.right" timestamp="1607119386262">
+      <screen x="0" y="25" width="1680" height="961" />
     </state>
     <state width="1899" height="102" key="GridCell.Tab.0.right/-1920.0.1920.1040/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1607107080128" />
+    <state width="1659" height="163" key="GridCell.Tab.0.right/0.25.1680.961@0.25.1680.961" timestamp="1607119386262" />
   </component>
 </project>

@@ -2,6 +2,8 @@ import { API, Characteristic, DynamicPlatformPlugin, Logger, PlatformAccessory, 
 
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
 import { ExamplePlatformAccessory } from './platformAccessory';
+import axios from 'axios';
+import { from } from 'rxjs';
 
 /**
  * HomebridgePlatform
@@ -50,7 +52,15 @@ export class AirdogPlatform implements DynamicPlatformPlugin {
    * must not be registered again to prevent "duplicate UUID" errors.
    */
   discoverDevices() {
-
+    let devices = from(axios.post('http://app.us.beiangkeji.com:9011/challenger/app/login/appId/I0I000I000I00100', {
+      loginName: this.config.email,
+      password: this.config.password,
+      clientType: 'iOS',
+      clientId: '7b741e1e24b2d4a024d42740173e365f',
+      language: 'en',
+    })).subscribe(d => console.log(d));
+    return;
+/*
     // EXAMPLE ONLY
     // A real plugin you would discover accessories from the local network, cloud services
     // or a user-defined array in the platform config.
@@ -116,6 +126,6 @@ export class AirdogPlatform implements DynamicPlatformPlugin {
         // link the accessory to your platform
         this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
       }
-    }
+    }*/
   }
 }

@@ -1,10 +1,10 @@
-import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, Service, Characteristic } from 'homebridge';
+import { API, Characteristic, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, Service } from 'homebridge';
 /**
  * HomebridgePlatform
  * This class is the main constructor for your plugin, this is where you should
  * parse the user config and discover/register accessories with Homebridge.
  */
-export declare class ExampleHomebridgePlatform implements DynamicPlatformPlugin {
+export declare class AirdogPlatform implements DynamicPlatformPlugin {
     readonly log: Logger;
     readonly config: PlatformConfig;
     readonly api: API;
