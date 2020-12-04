@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AirdogPlatform = void 0;
+const md5_1 = require("ts-md5/dist/md5");
 const axios_1 = __importDefault(require("axios"));
 const rxjs_1 = require("rxjs");
 /**
@@ -49,7 +50,7 @@ class AirdogPlatform {
     discoverDevices() {
         let devices = rxjs_1.from(axios_1.default.post('http://app.us.beiangkeji.com:9011/challenger/app/login/appId/I0I000I000I00100', {
             loginName: this.config.email,
-            password: this.config.password,
+            password: md5_1.Md5.hashStr(this.config.password).toString().toUpperCase(),
             clientType: 'iOS',
             clientId: '7b741e1e24b2d4a024d42740173e365f',
             language: 'en',

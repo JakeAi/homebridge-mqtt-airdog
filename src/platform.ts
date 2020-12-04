@@ -1,4 +1,5 @@
 import { API, Characteristic, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, Service } from 'homebridge';
+import {Md5} from 'ts-md5/dist/md5';
 
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
 import { ExamplePlatformAccessory } from './platformAccessory';
@@ -54,7 +55,7 @@ console.log(this.config)
   discoverDevices() {
     let devices = from(axios.post('http://app.us.beiangkeji.com:9011/challenger/app/login/appId/I0I000I000I00100', {
       loginName: this.config.email,
-      password: this.config.password,
+      password: Md5.hashStr(this.config.password as string).toString().toUpperCase(),
       clientType: 'iOS',
       clientId: '7b741e1e24b2d4a024d42740173e365f',
       language: 'en',
