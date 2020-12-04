@@ -23,7 +23,7 @@ export class AirdogPlatform implements DynamicPlatformPlugin {
     public readonly api: API,
   ) {
     this.log.debug('Finished initializing platform:', this.config.name);
-
+console.log(this.config)
     // When this event is fired it means Homebridge has restored all cached accessories from disk.
     // Dynamic Platform plugins should only register new accessories after this event was fired,
     // in order to ensure they weren't added to homebridge already. This event can also be used
@@ -58,7 +58,8 @@ export class AirdogPlatform implements DynamicPlatformPlugin {
       clientType: 'iOS',
       clientId: '7b741e1e24b2d4a024d42740173e365f',
       language: 'en',
-    })).subscribe(d => console.log(d.data));
+    }))
+      .subscribe(d => console.log(d.data));
     return;
 /*
     // EXAMPLE ONLY
