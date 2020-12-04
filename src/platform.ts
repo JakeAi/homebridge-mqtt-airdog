@@ -3,7 +3,7 @@ import { Md5 } from 'ts-md5/dist/md5';
 import axios from 'axios';
 import { from } from 'rxjs';
 import { map, mergeMap, tap } from 'rxjs/operators';
-import { AuthResponse } from './common';
+import { AuthResponse, AuthVerifyResponse, ListDevicesResponse } from './common';
 
 /**
  * HomebridgePlatform
@@ -21,6 +21,7 @@ export class AirdogPlatform implements DynamicPlatformPlugin {
   private id: string = '';
   private token: string = '';
   private userNo: string = '';
+  private language: string = 'en';
 
   constructor(
     public readonly log: Logger,
@@ -57,28 +58,82 @@ export class AirdogPlatform implements DynamicPlatformPlugin {
    * must not be registered again to prevent "duplicate UUID" errors.
    */
   discoverDevices() {
-
     from(axios.post<AuthResponse>('http://app.us.beiangkeji.com:9011/challenger/app/login/appId/I0I000I000I00100', {
       loginName: this.config.email,
       password: Md5.hashStr(this.config.password as string).toString().toUpperCase(),
       clientType: 'iOS',
       clientId: '7b741e1e24b2d4a024d42740173e365f',
-      language: 'en',
+      language: this.language,
     }))
       .pipe(
-        map(data => data.data),
+        map((data) => data.data),
         tap((d: AuthResponse) => this.id = d.id),
         tap((d: AuthResponse) => this.userNo = d.userNo),
         tap((d: AuthResponse) => this.token = d.token),
-        mergeMap(d => from(axios.get(`http://app.us.beiangkeji.com:9011/challenger/app/virifyToken/appId/I0I000I000I00100/token/${this.token}/language/en`))),
-        map(data => data.data),
+        mergeMap(d => from(axios.get<AuthVerifyResponse>(`http://app.us.beiangkeji.com:9011/challenger/app/virifyToken/appId/I0I000I000I00100/token/${this.token}/language/${this.language}`))),
+        map((data: AuthVerifyResponse) => data.data),
         tap((d: AuthResponse) => this.id = d.id),
-        mergeMap(() => from(axios.post(`http://app.us.beiangkeji.com:9001/columbia/app/searchUserDevice/appId/I0I000I000I00100/token/${this.token}`, {
+        mergeMap(() => from(axios.post<ListDevicesResponse>(`http://app.us.beiangkeji.com:9001/columbia/app/searchUserDevice/appId/I0I000I000I00100/token/${this.token}`, {
           userId: this.userNo,
-          language: 'en',
+          language: this.language,
         }))),
+        map((d) => d.data),
       )
-      .subscribe(d => console.log(d.data));
+      .subscribe((d: ListDevicesResponse) => {
+        // let devices = d.data;
+        // for (const device of devices) {
+        //
+        //   // generate a unique id for the accessory this should be generated from
+        //   // something globally unique, but constant, for example, the device serial
+        //   // number or MAC address
+        //   const uuid = this.api.hap.uuid.generate(device.deviceId);
+        //
+        //   // see if an accessory with the same uuid has already been registered and restored from
+        //   // the cached devices we stored in the `configureAccessory` method above
+        //   const existingAccessory = this.accessories.find(accessory => accessory.UUID === uuid);
+        //
+        //   if (existingAccessory) {
+        //     // the accessory already exists
+        //     if (device) {
+        //       this.log.info('Restoring existing accessory from cache:', existingAccessory.displayName);
+        //
+        //       // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. eg.:
+        //       // existingAccessory.context.device = device;
+        //       // this.api.updatePlatformAccessories([existingAccessory]);
+        //
+        //       // create the accessory handler for the restored accessory
+        //       // this is imported from `platformAccessory.ts`
+        //       new ExamplePlatformAccessory(this, existingAccessory);
+        //
+        //       // update accessory cache with any changes to the accessory details and information
+        //       this.api.updatePlatformAccessories([existingAccessory]);
+        //     } else if (!device) {
+        //       // it is possible to remove platform accessories at any time using `api.unregisterPlatformAccessories`, eg.:
+        //       // remove platform accessories when no longer present
+        //       this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [existingAccessory]);
+        //       this.log.info('Removing existing accessory from cache:', existingAccessory.displayName);
+        //     }
+        //   } else {
+        //     // the accessory does not yet exist, so we need to create it
+        //     this.log.info('Adding new accessory:', device.exampleDisplayName);
+        //
+        //     // create a new accessory
+        //     const accessory = new this.api.platformAccessory(device.exampleDisplayName, uuid);
+        //
+        //     // store a copy of the device object in the `accessory.context`
+        //     // the `context` property can be used to store any data about the accessory you may need
+        //     accessory.context.device = device;
+        //
+        //     // create the accessory handler for the newly create accessory
+        //     // this is imported from `platformAccessory.ts`
+        //     new ExamplePlatformAccessory(this, accessory);
+        //
+        //     // link the accessory to your platform
+        //     this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+        //   }
+        // }
+        console.log(d.data);
+      });
     return;
     /*
         // EXAMPLE ONLY
