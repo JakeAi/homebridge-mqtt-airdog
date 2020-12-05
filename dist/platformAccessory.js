@@ -5,6 +5,7 @@ const settings_1 = require("./settings");
 const mqtt_1 = require("./mqtt");
 const common_1 = require("./common");
 const operators_1 = require("rxjs/operators");
+const rxjs_1 = require("rxjs");
 /**
  * Platform Accessory
  * An instance of this class is created for each accessory your platform registers
@@ -18,6 +19,7 @@ class ExamplePlatformAccessory {
         // private airQualityservice: Service;
         this.mqtt = new mqtt_1.MQTT('mqtt://47.89.244.17');
         this.powerState = common_1.SwitchState.OFF;
+        this.powerState$ = new rxjs_1.BehaviorSubject(common_1.SwitchState.OFF);
         // set accessory information
         this.accessory.getService(this.platform.Service.AccessoryInformation)
             .setCharacteristic(this.platform.Characteristic.Manufacturer, settings_1.MANUFACTURER)
@@ -30,9 +32,10 @@ class ExamplePlatformAccessory {
         // in this example we are using the name we stored in the `accessory.context` in the `discoverDevices` method.
         this.airPurifierService.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device.deviceName);
         this.airPurifierService.getCharacteristic(this.platform.Characteristic.Active)
-            .on('set', this.setOn.bind(this));
+            .on('set', this.setOn.bind(this))
+            .on('get', this.getOn.bind(this));
         this.mqtt.register('purifier/server/app/sendPm/' + this.accessory.context.device.deviceId)
-            .pipe(operators_1.debounceTime(1000), operators_1.tap(d => console.log(d)))
+            .pipe(operators_1.debounceTime(1000), operators_1.tap(date => console.log({ date })))
             .subscribe((d) => {
             try {
                 this.powerState = d.power.indexOf('open') !== -1 ? common_1.SwitchState.ON : common_1.SwitchState.OFF;
@@ -40,7 +43,7 @@ class ExamplePlatformAccessory {
             catch (e) {
                 this.powerState = common_1.SwitchState.OFF;
             }
-            this.airPurifierService.updateCharacteristic(this.platform.Characteristic.Active, this.powerState);
+            this.powerState$.next(this.powerState);
         });
         // this.airPurifierService.getCharacteristic(this.platform.Characteristic.Active)
         //   .on('get', this.handleActiveGet.bind(this))
@@ -61,6 +64,7 @@ class ExamplePlatformAccessory {
         // register handlers for the On/Off Characteristic
         // this.airQualityservice = this.accessory.getService(this.platform.Service.AirQualitySensor) || this.accessory.addService(this.platform.Service.AirQualitySensor);
         // this.airQualityservice.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device.deviceName);
+        this.powerState$.subscribe((state) => this.airPurifierService.updateCharacteristic(this.platform.Characteristic.Active, state));
     }
     /**
      * Handle "SET" requests from HomeKit

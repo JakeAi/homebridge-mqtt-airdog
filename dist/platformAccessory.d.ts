@@ -12,6 +12,7 @@ export declare class ExamplePlatformAccessory {
     private airPurifierService;
     private mqtt;
     private powerState;
+    private powerState$;
     constructor(platform: AirdogPlatform, accessory: DevicePlatformAccessory, log: Logger);
     /**
      * Handle "SET" requests from HomeKit

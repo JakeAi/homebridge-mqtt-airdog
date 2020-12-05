@@ -4,6 +4,7 @@ import { MANUFACTURER } from './settings';
 import { MQTT } from './mqtt';
 import { Commands, PowerState, SendPm, SwitchState } from './common';
 import { debounceTime, tap } from 'rxjs/operators';
+import { BehaviorSubject } from 'rxjs';
 
 /**
  * Platform Accessory
@@ -17,6 +18,7 @@ export class ExamplePlatformAccessory {
   private mqtt: MQTT = new MQTT('mqtt://47.89.244.17');
 
   private powerState = SwitchState.OFF;
+  private powerState$: BehaviorSubject<SwitchState> = new BehaviorSubject<SwitchState>(SwitchState.OFF);
 
   constructor(
     private  platform: AirdogPlatform,
@@ -40,12 +42,13 @@ export class ExamplePlatformAccessory {
 
 
     this.airPurifierService.getCharacteristic(this.platform.Characteristic.Active)
-      .on('set', this.setOn.bind(this));
+      .on('set', this.setOn.bind(this))
+      .on('get', this.getOn.bind(this));
 
     this.mqtt.register<SendPm>('purifier/server/app/sendPm/' + this.accessory.context.device.deviceId)
       .pipe(
         debounceTime(1000),
-        tap(d => console.log(d)),
+        tap(date => console.log({ date })),
       )
       .subscribe((d) => {
         try {
@@ -53,7 +56,7 @@ export class ExamplePlatformAccessory {
         } catch (e) {
           this.powerState = SwitchState.OFF;
         }
-        this.airPurifierService.updateCharacteristic(this.platform.Characteristic.Active, this.powerState);
+        this.powerState$.next(this.powerState);
       });
     // this.airPurifierService.getCharacteristic(this.platform.Characteristic.Active)
     //   .on('get', this.handleActiveGet.bind(this))
@@ -76,7 +79,7 @@ export class ExamplePlatformAccessory {
     // register handlers for the On/Off Characteristic
     // this.airQualityservice = this.accessory.getService(this.platform.Service.AirQualitySensor) || this.accessory.addService(this.platform.Service.AirQualitySensor);
     // this.airQualityservice.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device.deviceName);
-
+    this.powerState$.subscribe((state) => this.airPurifierService.updateCharacteristic(this.platform.Characteristic.Active, state));
   }
 
   /**
