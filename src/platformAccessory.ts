@@ -92,6 +92,12 @@ export class ExamplePlatformAccessory {
 
         this.airQualityservice.updateCharacteristic(this.platform.Characteristic.PM2_5Density, this.pm);
 
+        if (this.pm >= 200) { this.airQualityservice.updateCharacteristic(this.platform.Characteristic.AirQuality, 5);}
+        if (this.pm >= 120 && this.pm < 200) { this.airQualityservice.updateCharacteristic(this.platform.Characteristic.AirQuality, 3);}
+        if (this.pm >= 65 && this.pm < 120) { this.airQualityservice.updateCharacteristic(this.platform.Characteristic.AirQuality, 2);}
+        if (this.pm > 0 && this.pm < 65) { this.airQualityservice.updateCharacteristic(this.platform.Characteristic.AirQuality, 1);}
+        if (this.pm === 0) { this.airQualityservice.updateCharacteristic(this.platform.Characteristic.AirQuality, 0);}
+
       });
     // this.airPurifierService.getCharacteristic(this.platform.Characteristic.Active)
     //   .on('get', this.handleActiveGet.bind(this))
