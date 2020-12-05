@@ -102,7 +102,7 @@ class AirdogPlatform {
                     this.api.registerPlatformAccessories(settings_1.PLUGIN_NAME, settings_1.PLATFORM_NAME, [accessory]);
                 }
             }
-        });
+        }, (err) => { console.error({ err }); });
     }
 }
 exports.AirdogPlatform = AirdogPlatform;

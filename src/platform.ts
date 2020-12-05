@@ -128,6 +128,6 @@ export class AirdogPlatform implements DynamicPlatformPlugin {
             this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
           }
         }
-      });
+      },(err)=>{console.error({ err })});
   }
 }
