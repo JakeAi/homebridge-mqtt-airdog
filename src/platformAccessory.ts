@@ -110,7 +110,7 @@ export class ExamplePlatformAccessory {
     // this.airQualityservice.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device.deviceName);
     this.powerState$
       .subscribe((state) => {
-        this.airPurifierService.updateCharacteristic(this.platform.Characteristic.CurrentAirPurifierState, state*2);
+        this.airPurifierService.updateCharacteristic(this.platform.Characteristic.CurrentAirPurifierState, state * 2);
       });
   }
 
@@ -119,7 +119,6 @@ export class ExamplePlatformAccessory {
    * These are sent when the user changes the state of an accessory, for example, turning on a Light bulb.
    */
   setOn(value: CharacteristicValue, callback: CharacteristicSetCallback) {
-    console.log({ value });
     this.mqtt.publish('purifier/app/switch/' + this.platform.userNo, {
       deviceNo: this.accessory.context.device.deviceId,
       language: 'en',
@@ -130,8 +129,9 @@ export class ExamplePlatformAccessory {
       productId: '92AD88F0',
     });
     this.platform.log.debug('Set Characteristic On ->', value);
+    this.powerState$.next(this.powerState = value as number * 2);
     // you must call the callback function
-    callback(null, value);
+    callback(null);
   }
 
   /**
