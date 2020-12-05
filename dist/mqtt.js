@@ -50,8 +50,8 @@ class MQTT {
     onMessage(mqttMessage) {
         for (let registration in this.subscriptions) {
             if (MQTTPattern.matches(registration, mqttMessage.topic)) {
-                mqttMessage.message = JSON.parse(mqttMessage.message.toString());
-                this.subscriptions[registration].next(mqttMessage);
+                let msg = JSON.parse(mqttMessage.message.toString());
+                this.subscriptions[registration].next(msg);
             }
         }
     }

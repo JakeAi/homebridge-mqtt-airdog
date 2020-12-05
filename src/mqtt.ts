@@ -22,7 +22,7 @@ export class MQTT {
     this._mqtt.on('error', (error) => console.log(error));
   }
 
-  publish(topic:MqttMessage['topic'], message:MqttMessage['message']): any {
+  publish(topic: MqttMessage['topic'], message: MqttMessage['message']): any {
     this._mqtt.publish(topic, message);
   }
 
@@ -38,8 +38,8 @@ export class MQTT {
   private onMessage(mqttMessage: MqttMessage) {
     for (let registration in this.subscriptions) {
       if (MQTTPattern.matches(registration, mqttMessage.topic)) {
-        mqttMessage.message = JSON.parse(mqttMessage.message.toString());
-        this.subscriptions[registration].next(mqttMessage);
+        let msg = JSON.parse(mqttMessage.message.toString());
+        this.subscriptions[registration].next(msg);
       }
     }
   }
