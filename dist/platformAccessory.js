@@ -16,7 +16,6 @@ class ExamplePlatformAccessory {
         this.platform = platform;
         this.accessory = accessory;
         this.log = log;
-        // private airQualityservice: Service;
         this.mqtt = new mqtt_1.MQTT('mqtt://47.89.244.17');
         this.powerState = common_1.SwitchState.OFF;
         this.powerState$ = new rxjs_1.BehaviorSubject(common_1.SwitchState.OFF);
@@ -26,6 +25,7 @@ class ExamplePlatformAccessory {
         this.sleepState$ = new rxjs_1.BehaviorSubject(common_1.SwitchState.OFF);
         this.lockState = common_1.SwitchState.OFF;
         this.lockState$ = new rxjs_1.BehaviorSubject(common_1.SwitchState.OFF);
+        this.pm = 0;
         // set accessory information
         this.accessory.getService(this.platform.Service.AccessoryInformation)
             .setCharacteristic(this.platform.Characteristic.Manufacturer, settings_1.MANUFACTURER)
@@ -62,9 +62,11 @@ class ExamplePlatformAccessory {
             this.powerState = ((_a = d === null || d === void 0 ? void 0 : d.power) === null || _a === void 0 ? void 0 : _a.indexOf('open')) !== -1 ? common_1.SwitchState.ON : common_1.SwitchState.OFF;
             this.lockState = ((_b = d === null || d === void 0 ? void 0 : d.children) === null || _b === void 0 ? void 0 : _b.indexOf('open')) !== -1 ? common_1.SwitchState.ON : common_1.SwitchState.OFF;
             this.fanState = ((_c = d === null || d === void 0 ? void 0 : d.speed) === null || _c === void 0 ? void 0 : _c.indexOf('auto')) !== -1 ? common_1.FanState.AUTO : common_1.FanState.LOW;
+            this.pm = parseFloat(d === null || d === void 0 ? void 0 : d.pm);
             this.powerState$.next(this.powerState);
             this.lockState$.next(this.lockState);
             this.fanState$.next(this.fanState);
+            this.airQualityservice.updateCharacteristic(this.platform.Characteristic.PM2_5Density, this.pm);
         });
         // this.airPurifierService.getCharacteristic(this.platform.Characteristic.Active)
         //   .on('get', this.handleActiveGet.bind(this))
@@ -83,8 +85,10 @@ class ExamplePlatformAccessory {
         // each service must implement at-minimum the "required characteristics" for the given service type
         // see https://developers.homebridge.io/#/service/Lightbulb
         // register handlers for the On/Off Characteristic
-        // this.airQualityservice = this.accessory.getService(this.platform.Service.AirQualitySensor) || this.accessory.addService(this.platform.Service.AirQualitySensor);
-        // this.airQualityservice.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device.deviceName);
+        this.airQualityservice = this.accessory.getService(this.platform.Service.AirQualitySensor) || this.accessory.addService(this.platform.Service.AirQualitySensor);
+        this.airQualityservice.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device.deviceName);
+        this.airQualityservice.getCharacteristic(this.platform.Characteristic.AirQuality)
+            .on('get', this.getPm.bind(this));
         this.powerState$
             .subscribe((state) => {
             this.airPurifierService.updateCharacteristic(this.platform.Characteristic.CurrentAirPurifierState, state * 2);
@@ -129,6 +133,10 @@ class ExamplePlatformAccessory {
         // the first argument should be null if there were no errors
         // the second argument should be the value to return
         callback(null, this.powerState);
+    }
+    getPm(callback) {
+        this.platform.log.debug('Get Characteristic On ->', this.powerState);
+        callback(null, this.pm);
     }
     /**
      * Handle requests to get the current value of the "Active" characteristic

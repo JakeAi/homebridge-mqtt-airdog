@@ -13,7 +13,7 @@ import { BehaviorSubject } from 'rxjs';
  */
 export class ExamplePlatformAccessory {
   private airPurifierService: Service;
-  // private airQualityservice: Service;
+  private airQualityservice: Service;
 
   private mqtt: MQTT = new MQTT('mqtt://47.89.244.17');
 
@@ -28,6 +28,8 @@ export class ExamplePlatformAccessory {
 
   private lockState = SwitchState.OFF;
   private lockState$: BehaviorSubject<SwitchState> = new BehaviorSubject<SwitchState>(SwitchState.OFF);
+
+  private pm: number = 0;
 
   constructor(
     private  platform: AirdogPlatform,
@@ -83,9 +85,13 @@ export class ExamplePlatformAccessory {
         this.powerState = d?.power?.indexOf('open') !== -1 ? SwitchState.ON : SwitchState.OFF;
         this.lockState = d?.children?.indexOf('open') !== -1 ? SwitchState.ON : SwitchState.OFF;
         this.fanState = d?.speed?.indexOf('auto') !== -1 ? FanState.AUTO : FanState.LOW;
+        this.pm = parseFloat(d?.pm);
         this.powerState$.next(this.powerState);
         this.lockState$.next(this.lockState);
         this.fanState$.next(this.fanState);
+
+        this.airQualityservice.updateCharacteristic(this.platform.Characteristic.PM2_5Density, this.pm);
+
       });
     // this.airPurifierService.getCharacteristic(this.platform.Characteristic.Active)
     //   .on('get', this.handleActiveGet.bind(this))
@@ -106,8 +112,11 @@ export class ExamplePlatformAccessory {
     // see https://developers.homebridge.io/#/service/Lightbulb
 
     // register handlers for the On/Off Characteristic
-    // this.airQualityservice = this.accessory.getService(this.platform.Service.AirQualitySensor) || this.accessory.addService(this.platform.Service.AirQualitySensor);
-    // this.airQualityservice.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device.deviceName);
+    this.airQualityservice = this.accessory.getService(this.platform.Service.AirQualitySensor) || this.accessory.addService(this.platform.Service.AirQualitySensor);
+    this.airQualityservice.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device.deviceName);
+    this.airQualityservice.getCharacteristic(this.platform.Characteristic.AirQuality)
+      .on('get', this.getPm.bind(this));
+
     this.powerState$
       .subscribe((state) => {
         this.airPurifierService.updateCharacteristic(this.platform.Characteristic.CurrentAirPurifierState, state * 2);
@@ -156,6 +165,11 @@ export class ExamplePlatformAccessory {
     // the first argument should be null if there were no errors
     // the second argument should be the value to return
     callback(null, this.powerState);
+  }
+
+  getPm(callback: CharacteristicGetCallback) {
+    this.platform.log.debug('Get Characteristic On ->', this.powerState);
+    callback(null, this.pm);
   }
 
   /**

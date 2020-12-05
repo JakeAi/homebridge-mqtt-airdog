@@ -10,6 +10,7 @@ export declare class ExamplePlatformAccessory {
     private accessory;
     readonly log: Logger;
     private airPurifierService;
+    private airQualityservice;
     private mqtt;
     private powerState;
     private powerState$;
@@ -19,6 +20,7 @@ export declare class ExamplePlatformAccessory {
     private sleepState$;
     private lockState;
     private lockState$;
+    private pm;
     constructor(platform: AirdogPlatform, accessory: DevicePlatformAccessory, log: Logger);
     /**
      * Handle "SET" requests from HomeKit
@@ -39,6 +41,7 @@ export declare class ExamplePlatformAccessory {
      * this.service.updateCharacteristic(this.platform.Characteristic.On, true)
      */
     getOn(callback: CharacteristicGetCallback): void;
+    getPm(callback: CharacteristicGetCallback): void;
     /**
      * Handle requests to get the current value of the "Active" characteristic
      */
