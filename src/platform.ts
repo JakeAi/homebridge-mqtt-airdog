@@ -71,19 +71,24 @@ export class AirdogPlatform implements DynamicPlatformPlugin {
       language: this.language,
     }))
       .pipe(
+        tap((d) => console.log(d.data)),
         map((data) => data.data),
         tap((d: AuthResponse) => this.id = d.id),
         tap((d: AuthResponse) => this.userNo = d.userNo),
         tap((d: AuthResponse) => this.token = d.token),
+        tap(d => console.log(d)),
         mergeMap(d => from(axios.get<AuthVerifyResponse>(`http://app.us.beiangkeji.com:9011/challenger/app/virifyToken/appId/I0I000I000I00100/token/${this.token}/language/${this.language}`))),
+        tap((d) => console.log(d.data)),
         map((data: AuthVerifyResponse) => data.data),
         tap((d: AuthResponse) => this.id = d.id),
         mergeMap(() => from(axios.post<ListDevicesResponse>(`http://app.us.beiangkeji.com:9001/columbia/app/searchUserDevice/appId/I0I000I000I00100/token/${this.token}`, {
           userId: this.userNo,
           language: this.language,
         }))),
+        tap((d) => console.log(d.data)),
         map((d) => d.data),
       )
+      // @ts-ignore
       .subscribe((d: ListDevicesResponse) => {
         let devices = d.data;
         for (const device of devices) {

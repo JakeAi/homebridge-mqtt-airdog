@@ -63,10 +63,11 @@ class AirdogPlatform {
             clientId: '7b741e1e24b2d4a024d42740173e365f',
             language: this.language,
         }))
-            .pipe(operators_1.map((data) => data.data), operators_1.tap((d) => this.id = d.id), operators_1.tap((d) => this.userNo = d.userNo), operators_1.tap((d) => this.token = d.token), operators_1.mergeMap(d => rxjs_1.from(axios_1.default.get(`http://app.us.beiangkeji.com:9011/challenger/app/virifyToken/appId/I0I000I000I00100/token/${this.token}/language/${this.language}`))), operators_1.map((data) => data.data), operators_1.tap((d) => this.id = d.id), operators_1.mergeMap(() => rxjs_1.from(axios_1.default.post(`http://app.us.beiangkeji.com:9001/columbia/app/searchUserDevice/appId/I0I000I000I00100/token/${this.token}`, {
+            .pipe(operators_1.tap((d) => console.log(d.data)), operators_1.map((data) => data.data), operators_1.tap((d) => this.id = d.id), operators_1.tap((d) => this.userNo = d.userNo), operators_1.tap((d) => this.token = d.token), operators_1.tap(d => console.log(d)), operators_1.mergeMap(d => rxjs_1.from(axios_1.default.get(`http://app.us.beiangkeji.com:9011/challenger/app/virifyToken/appId/I0I000I000I00100/token/${this.token}/language/${this.language}`))), operators_1.tap((d) => console.log(d.data)), operators_1.map((data) => data.data), operators_1.tap((d) => this.id = d.id), operators_1.mergeMap(() => rxjs_1.from(axios_1.default.post(`http://app.us.beiangkeji.com:9001/columbia/app/searchUserDevice/appId/I0I000I000I00100/token/${this.token}`, {
             userId: this.userNo,
             language: this.language,
-        }))), operators_1.map((d) => d.data))
+        }))), operators_1.tap((d) => console.log(d.data)), operators_1.map((d) => d.data))
+            // @ts-ignore
             .subscribe((d) => {
             let devices = d.data;
             for (const device of devices) {

@@ -2,32 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="7d60ea40-997e-4780-972a-017d9c9d0986" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/mqtt.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/common.d.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/common.d.ts.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/common.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/common.js.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/index.d.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/index.d.ts.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/index.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/index.js.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/platform.d.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/platform.d.ts.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/platform.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/platform.js.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/platformAccessory.d.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/platformAccessory.d.ts.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/platformAccessory.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/platformAccessory.js.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/settings.d.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/settings.d.ts.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/settings.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/settings.js.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/platform.d.ts.map" beforeDir="false" afterPath="$PROJECT_DIR$/dist/platform.d.ts.map" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/platform.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/platform.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/platform.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/dist/platform.js.map" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/platform.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/platform.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/platformAccessory.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/platformAccessory.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -95,7 +74,7 @@
       <option name="presentableId" value="Default" />
       <updated>1607106117836</updated>
       <workItem from="1607106119023" duration="2951000" />
-      <workItem from="1607118753105" duration="9670000" />
+      <workItem from="1607118753105" duration="10592000" />
     </task>
     <servers />
   </component>
@@ -107,25 +86,25 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="740" y="275" key="FileChooserDialogImpl/-1920.0.1920.1040/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1607107771941" />
-    <state width="1659" height="163" key="GridCell.Tab.0.bottom" timestamp="1607186806763">
+    <state width="1659" height="187" key="GridCell.Tab.0.bottom" timestamp="1607189834492">
       <screen x="0" y="25" width="1680" height="961" />
     </state>
     <state width="1899" height="102" key="GridCell.Tab.0.bottom/-1920.0.1920.1040/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1607107080128" />
-    <state width="1659" height="163" key="GridCell.Tab.0.bottom/0.25.1680.961@0.25.1680.961" timestamp="1607186806763" />
-    <state width="1659" height="163" key="GridCell.Tab.0.center" timestamp="1607186806763">
+    <state width="1659" height="187" key="GridCell.Tab.0.bottom/0.25.1680.961@0.25.1680.961" timestamp="1607189834492" />
+    <state width="1659" height="187" key="GridCell.Tab.0.center" timestamp="1607189834491">
       <screen x="0" y="25" width="1680" height="961" />
     </state>
     <state width="1899" height="102" key="GridCell.Tab.0.center/-1920.0.1920.1040/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1607107080128" />
-    <state width="1659" height="163" key="GridCell.Tab.0.center/0.25.1680.961@0.25.1680.961" timestamp="1607186806763" />
-    <state width="1659" height="163" key="GridCell.Tab.0.left" timestamp="1607186806762">
+    <state width="1659" height="187" key="GridCell.Tab.0.center/0.25.1680.961@0.25.1680.961" timestamp="1607189834491" />
+    <state width="1659" height="187" key="GridCell.Tab.0.left" timestamp="1607189834489">
       <screen x="0" y="25" width="1680" height="961" />
     </state>
     <state width="1899" height="102" key="GridCell.Tab.0.left/-1920.0.1920.1040/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1607107080128" />
-    <state width="1659" height="163" key="GridCell.Tab.0.left/0.25.1680.961@0.25.1680.961" timestamp="1607186806762" />
-    <state width="1659" height="163" key="GridCell.Tab.0.right" timestamp="1607186806763">
+    <state width="1659" height="187" key="GridCell.Tab.0.left/0.25.1680.961@0.25.1680.961" timestamp="1607189834489" />
+    <state width="1659" height="187" key="GridCell.Tab.0.right" timestamp="1607189834491">
       <screen x="0" y="25" width="1680" height="961" />
     </state>
     <state width="1899" height="102" key="GridCell.Tab.0.right/-1920.0.1920.1040/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1607107080128" />
-    <state width="1659" height="163" key="GridCell.Tab.0.right/0.25.1680.961@0.25.1680.961" timestamp="1607186806763" />
+    <state width="1659" height="187" key="GridCell.Tab.0.right/0.25.1680.961@0.25.1680.961" timestamp="1607189834491" />
   </component>
 </project>
