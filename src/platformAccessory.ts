@@ -2,7 +2,7 @@ import { CharacteristicGetCallback, CharacteristicSetCallback, CharacteristicVal
 import { AirdogPlatform, DevicePlatformAccessory } from './platform';
 import { MANUFACTURER } from './settings';
 import { MQTT } from './mqtt';
-import { Commands, PowerState, SendPm } from './common';
+import { Commands, PowerState, SendPm, SwitchState } from './common';
 import { debounceTime, tap } from 'rxjs/operators';
 
 /**
@@ -16,7 +16,7 @@ export class ExamplePlatformAccessory {
 
   private mqtt: MQTT = new MQTT('mqtt://47.89.244.17');
 
-  private powerState = PowerState.OFF;
+  private powerState = SwitchState.OFF;
 
   constructor(
     private  platform: AirdogPlatform,
@@ -48,7 +48,7 @@ export class ExamplePlatformAccessory {
         tap(d => console.log(d)),
       )
       .subscribe((d) => {
-        this.powerState = d.power.indexOf('open') !== -1 ? PowerState.ON : PowerState.OFF;
+        this.powerState = d.power.indexOf('open') !== -1 ? SwitchState.ON : SwitchState.OFF;
         this.airPurifierService.updateCharacteristic(this.platform.Characteristic.Active, this.powerState);
       });
     // this.airPurifierService.getCharacteristic(this.platform.Characteristic.Active)
@@ -86,7 +86,7 @@ export class ExamplePlatformAccessory {
       language: 'en',
       openId: '4CA90DA0',
       order: Commands.sendPower,
-      paramCode: PowerState.ON,
+      paramCode: value === SwitchState.ON ? PowerState.ON : PowerState.OFF,
       smartCode: '00',
       productId: '92AD88F0',
     });

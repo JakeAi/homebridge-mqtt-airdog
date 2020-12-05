@@ -17,7 +17,7 @@ class ExamplePlatformAccessory {
         this.log = log;
         // private airQualityservice: Service;
         this.mqtt = new mqtt_1.MQTT('mqtt://47.89.244.17');
-        this.powerState = common_1.PowerState.OFF;
+        this.powerState = common_1.SwitchState.OFF;
         // set accessory information
         this.accessory.getService(this.platform.Service.AccessoryInformation)
             .setCharacteristic(this.platform.Characteristic.Manufacturer, settings_1.MANUFACTURER)
@@ -34,7 +34,7 @@ class ExamplePlatformAccessory {
         this.mqtt.register('purifier/server/app/sendPm/' + this.accessory.context.device.deviceId)
             .pipe(operators_1.debounceTime(1000), operators_1.tap(d => console.log(d)))
             .subscribe((d) => {
-            this.powerState = d.power.indexOf('open') !== -1 ? common_1.PowerState.ON : common_1.PowerState.OFF;
+            this.powerState = d.power.indexOf('open') !== -1 ? common_1.SwitchState.ON : common_1.SwitchState.OFF;
             this.airPurifierService.updateCharacteristic(this.platform.Characteristic.Active, this.powerState);
         });
         // this.airPurifierService.getCharacteristic(this.platform.Characteristic.Active)
@@ -68,7 +68,7 @@ class ExamplePlatformAccessory {
             language: 'en',
             openId: '4CA90DA0',
             order: common_1.Commands.sendPower,
-            paramCode: common_1.PowerState.ON,
+            paramCode: value === common_1.SwitchState.ON ? common_1.PowerState.ON : common_1.PowerState.OFF,
             smartCode: '00',
             productId: '92AD88F0',
         });
