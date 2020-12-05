@@ -32,9 +32,8 @@ class ExamplePlatformAccessory {
         this.airPurifierService.getCharacteristic(this.platform.Characteristic.Active)
             .on('set', this.setOn.bind(this));
         this.mqtt.register('purifier/server/app/sendPm/' + this.accessory.context.device.deviceId)
-            .pipe(operators_1.tap(d => console.log(d)))
+            .pipe(operators_1.debounceTime(1000), operators_1.tap(d => console.log(d)))
             .subscribe((d) => {
-            console.log(d);
             this.powerState = d.power.indexOf('open') !== -1 ? common_1.PowerState.ON : common_1.PowerState.OFF;
             this.airPurifierService.updateCharacteristic(this.platform.Characteristic.Active, this.powerState);
         });

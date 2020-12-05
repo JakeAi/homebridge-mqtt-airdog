@@ -23,7 +23,7 @@ export class MQTT {
   }
 
   publish(topic: MqttMessage['topic'], message: MqttMessage['message']): any {
-    this._mqtt.publish(topic, message);
+    this._mqtt.publish(topic, JSON.stringify(message));
   }
 
   register<T>(channel: string): Subject<T> {

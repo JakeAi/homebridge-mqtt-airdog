@@ -38,7 +38,7 @@ class MQTT {
         this._mqtt.on('error', (error) => console.log(error));
     }
     publish(topic, message) {
-        this._mqtt.publish(topic, message);
+        this._mqtt.publish(topic, JSON.stringify(message));
     }
     register(channel) {
         if (this.subscriptions[channel] === undefined) {
