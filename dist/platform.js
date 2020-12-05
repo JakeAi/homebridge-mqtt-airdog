@@ -22,7 +22,7 @@ class AirdogPlatform {
         this.api = api;
         this.Service = this.api.hap.Service;
         this.Characteristic = this.api.hap.Characteristic;
-        this.url = 'http://app.us.beiangkeji.com:9011';
+        this.url = 'http://app.us.beiangkeji.com';
         // this is used to track restored cached accessories
         this.accessories = [];
         this.id = '';
@@ -56,14 +56,14 @@ class AirdogPlatform {
      * must not be registered again to prevent "duplicate UUID" errors.
      */
     discoverDevices() {
-        rxjs_1.from(axios_1.default.post(this.url + 'http://app.us.beiangkeji.com:9011/challenger/app/login/appId/I0I000I000I00100', {
+        rxjs_1.from(axios_1.default.post(this.url + ':9011/challenger/app/login/appId/I0I000I000I00100', {
             loginName: this.config.email,
             password: md5_1.Md5.hashStr(this.config.password).toString().toUpperCase(),
             clientType: 'iOS',
             clientId: '7b741e1e24b2d4a024d42740173e365f',
             language: this.language,
         }))
-            .pipe(operators_1.tap((d) => console.log(d.data)), operators_1.map((data) => data.data), operators_1.tap((d) => this.id = d.id), operators_1.tap((d) => this.userNo = d.userNo), operators_1.tap((d) => this.token = d.token), operators_1.tap(d => console.log(d)), operators_1.mergeMap(d => rxjs_1.from(axios_1.default.get(`http://app.us.beiangkeji.com:9011/challenger/app/virifyToken/appId/I0I000I000I00100/token/${this.token}/language/${this.language}`))), operators_1.tap((d) => console.log(d.data)), operators_1.map((data) => data.data), operators_1.tap((d) => this.id = d.id), operators_1.mergeMap(() => rxjs_1.from(axios_1.default.post(`http://app.us.beiangkeji.com:9001/columbia/app/searchUserDevice/appId/I0I000I000I00100/token/${this.token}`, {
+            .pipe(operators_1.tap((d) => console.log(d.data)), operators_1.map((data) => data.data), operators_1.tap((d) => this.id = d.id), operators_1.tap((d) => this.userNo = d.userNo), operators_1.tap((d) => this.token = d.token), operators_1.tap(d => console.log(d)), operators_1.mergeMap(d => rxjs_1.from(axios_1.default.get(this.url + `:9011/challenger/app/virifyToken/appId/I0I000I000I00100/token/${this.token}/language/${this.language}`))), operators_1.tap((d) => console.log(d.data)), operators_1.map((data) => data.data), operators_1.tap((d) => this.id = d.id), operators_1.mergeMap(() => rxjs_1.from(axios_1.default.post(this.url + `/columbia/app/searchUserDevice/appId/I0I000I000I00100/token/${this.token}`, {
             userId: this.userNo,
             language: this.language,
         }))), operators_1.tap((d) => console.log(d.data)), operators_1.map((d) => d.data))

@@ -18,7 +18,7 @@ export class AirdogPlatform implements DynamicPlatformPlugin {
   public readonly Service: typeof Service = this.api.hap.Service;
   public readonly Characteristic: typeof Characteristic = this.api.hap.Characteristic;
 
-  private url: string = 'http://app.us.beiangkeji.com:9011';
+  private url: string = 'http://app.us.beiangkeji.com';
   // this is used to track restored cached accessories
   public readonly accessories: DevicePlatformAccessory[] = [];
 
@@ -63,7 +63,7 @@ export class AirdogPlatform implements DynamicPlatformPlugin {
    * must not be registered again to prevent "duplicate UUID" errors.
    */
   discoverDevices() {
-    from(axios.post<AuthResponse>(this.url + 'http://app.us.beiangkeji.com:9011/challenger/app/login/appId/I0I000I000I00100', {
+    from(axios.post<AuthResponse>(this.url + ':9011/challenger/app/login/appId/I0I000I000I00100', {
       loginName: this.config.email,
       password: Md5.hashStr(this.config.password as string).toString().toUpperCase(),
       clientType: 'iOS',
@@ -77,11 +77,11 @@ export class AirdogPlatform implements DynamicPlatformPlugin {
         tap((d: AuthResponse) => this.userNo = d.userNo),
         tap((d: AuthResponse) => this.token = d.token),
         tap(d => console.log(d)),
-        mergeMap(d => from(axios.get<AuthVerifyResponse>(`http://app.us.beiangkeji.com:9011/challenger/app/virifyToken/appId/I0I000I000I00100/token/${this.token}/language/${this.language}`))),
+        mergeMap(d => from(axios.get<AuthVerifyResponse>(this.url + `:9011/challenger/app/virifyToken/appId/I0I000I000I00100/token/${this.token}/language/${this.language}`))),
         tap((d) => console.log(d.data)),
         map((data: AuthVerifyResponse) => data.data),
         tap((d: AuthResponse) => this.id = d.id),
-        mergeMap(() => from(axios.post<ListDevicesResponse>(`http://app.us.beiangkeji.com:9001/columbia/app/searchUserDevice/appId/I0I000I000I00100/token/${this.token}`, {
+        mergeMap(() => from(axios.post<ListDevicesResponse>(this.url + `/columbia/app/searchUserDevice/appId/I0I000I000I00100/token/${this.token}`, {
           userId: this.userNo,
           language: this.language,
         }))),
