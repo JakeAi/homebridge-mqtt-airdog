@@ -1,20 +1,18 @@
-import { PlatformAccessory, CharacteristicValue, CharacteristicSetCallback, CharacteristicGetCallback } from 'homebridge';
-import { AirdogPlatform } from './platform';
+import { CharacteristicGetCallback, CharacteristicSetCallback, CharacteristicValue, Logger } from 'homebridge';
+import { AirdogPlatform, DevicePlatformAccessory } from './platform';
 /**
  * Platform Accessory
  * An instance of this class is created for each accessory your platform registers
  * Each accessory may expose multiple services of different service types.
  */
 export declare class ExamplePlatformAccessory {
-    private readonly platform;
-    private readonly accessory;
-    private service;
-    /**
-     * These are just used to create a working example
-     * You should implement your own code to track the state of your accessory
-     */
-    private exampleStates;
-    constructor(platform: AirdogPlatform, accessory: PlatformAccessory);
+    private platform;
+    private accessory;
+    readonly log: Logger;
+    private airPurifierService;
+    private mqtt;
+    private powerState;
+    constructor(platform: AirdogPlatform, accessory: DevicePlatformAccessory, log: Logger);
     /**
      * Handle "SET" requests from HomeKit
      * These are sent when the user changes the state of an accessory, for example, turning on a Light bulb.
@@ -35,9 +33,24 @@ export declare class ExamplePlatformAccessory {
      */
     getOn(callback: CharacteristicGetCallback): void;
     /**
-     * Handle "SET" requests from HomeKit
-     * These are sent when the user changes the state of an accessory, for example, changing the Brightness
+     * Handle requests to get the current value of the "Active" characteristic
      */
-    setBrightness(value: CharacteristicValue, callback: CharacteristicSetCallback): void;
+    handleActiveGet(callback: any): void;
+    /**
+     * Handle requests to set the "Active" characteristic
+     */
+    handleActiveSet(value: any, callback: any): void;
+    /**
+     * Handle requests to get the current value of the "Current Air Purifier State" characteristic
+     */
+    handleCurrentAirPurifierStateGet(callback: any): void;
+    /**
+     * Handle requests to get the current value of the "Target Air Purifier State" characteristic
+     */
+    handleTargetAirPurifierStateGet(callback: any): void;
+    /**
+     * Handle requests to set the "Target Air Purifier State" characteristic
+     */
+    handleTargetAirPurifierStateSet(value: any, callback: any): void;
 }
 //# sourceMappingURL=platformAccessory.d.ts.map

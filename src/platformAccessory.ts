@@ -1,7 +1,8 @@
-import { CharacteristicGetCallback, CharacteristicSetCallback, CharacteristicValue, PlatformAccessory, Service } from 'homebridge';
-
-import { AirdogPlatform } from './platform';
+import { CharacteristicGetCallback, CharacteristicSetCallback, CharacteristicValue, Logger, Service } from 'homebridge';
+import { AirdogPlatform, DevicePlatformAccessory } from './platform';
 import { MANUFACTURER } from './settings';
+import { MQTT } from './mqtt';
+import { Commands, PowerState, SendPm } from './common';
 
 /**
  * Platform Accessory
@@ -9,88 +10,64 @@ import { MANUFACTURER } from './settings';
  * Each accessory may expose multiple services of different service types.
  */
 export class ExamplePlatformAccessory {
-  private service: Service;
+  private airPurifierService: Service;
+  // private airQualityservice: Service;
 
-  /**
-   * These are just used to create a working example
-   * You should implement your own code to track the state of your accessory
-   */
-  private exampleStates = {
-    On: false,
-    Brightness: 100,
-  };
+  private mqtt: MQTT = new MQTT('mqtt://47.89.244.17');
+
+  private powerState = PowerState.OFF;
 
   constructor(
     private  platform: AirdogPlatform,
-    private  accessory: PlatformAccessory,
+    private  accessory: DevicePlatformAccessory,
+    public readonly log: Logger,
   ) {
 
     // set accessory information
     this.accessory.getService(this.platform.Service.AccessoryInformation)!
       .setCharacteristic(this.platform.Characteristic.Manufacturer, MANUFACTURER)
-      .setCharacteristic(this.platform.Characteristic.Model, 'Default-Model')
-      .setCharacteristic(this.platform.Characteristic.SerialNumber, 'Default-Serial');
+      .setCharacteristic(this.platform.Characteristic.Model, 'X5')
+      .setCharacteristic(this.platform.Characteristic.SerialNumber, 'X5');
 
     // get the LightBulb service if it exists, otherwise create a new LightBulb service
     // you can create multiple services for each accessory
-    this.service = this.accessory.getService(this.platform.Service.Lightbulb) || this.accessory.addService(this.platform.Service.Lightbulb);
+    this.airPurifierService = this.accessory.getService(this.platform.Service.AirPurifier) || this.accessory.addService(this.platform.Service.AirPurifier);
 
     // set the service name, this is what is displayed as the default name on the Home app
     // in this example we are using the name we stored in the `accessory.context` in the `discoverDevices` method.
-    this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device.exampleDisplayName);
+    this.airPurifierService.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device.deviceName);
+
+
+    this.airPurifierService.getCharacteristic(this.platform.Characteristic.Active)
+      .on('set', this.setOn.bind(this));
+
+    this.mqtt.register<SendPm>('purifier/server/app/sendPm/' + this.accessory.context.device.deviceId)
+      .subscribe((d) => {
+        this.powerState = d.power.indexOf('open') !== -1 ? PowerState.ON : PowerState.OFF;
+        this.airPurifierService.updateCharacteristic(this.platform.Characteristic.Active, this.powerState);
+      });
+    // this.airPurifierService.getCharacteristic(this.platform.Characteristic.Active)
+    //   .on('get', this.handleActiveGet.bind(this))
+    //   .on('set', this.handleActiveSet.bind(this));
+    //
+    // this.airPurifierService.getCharacteristic(this.platform.Characteristic.RotationSpeed)
+    //   .on('get', this.handleActiveGet.bind(this))
+    //   .on('set', this.handleActiveSet.bind(this));
+    //
+    // this.airPurifierService.getCharacteristic(this.platform.Characteristic.CurrentAirPurifierState)
+    //   .on('get', this.handleCurrentAirPurifierStateGet.bind(this));
+    //
+    // this.airPurifierService.getCharacteristic(this.platform.Characteristic.TargetAirPurifierState)
+    //   .on('get', this.handleTargetAirPurifierStateGet.bind(this))
+    //   .on('set', this.handleTargetAirPurifierStateSet.bind(this));
 
     // each service must implement at-minimum the "required characteristics" for the given service type
     // see https://developers.homebridge.io/#/service/Lightbulb
 
     // register handlers for the On/Off Characteristic
-    this.service.getCharacteristic(this.platform.Characteristic.On)
-      .on('set', this.setOn.bind(this))                // SET - bind to the `setOn` method below
-      .on('get', this.getOn.bind(this));               // GET - bind to the `getOn` method below
+    // this.airQualityservice = this.accessory.getService(this.platform.Service.AirQualitySensor) || this.accessory.addService(this.platform.Service.AirQualitySensor);
+    // this.airQualityservice.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device.deviceName);
 
-    // register handlers for the Brightness Characteristic
-    this.service.getCharacteristic(this.platform.Characteristic.Brightness)
-      .on('set', this.setBrightness.bind(this));       // SET - bind to the 'setBrightness` method below
-
-
-    /**
-     * Creating multiple services of the same type.
-     *
-     * To avoid "Cannot add a Service with the same UUID another Service without also defining a unique 'subtype' property." error,
-     * when creating multiple services of the same type, you need to use the following syntax to specify a name and subtype id:
-     * this.accessory.getService('NAME') || this.accessory.addService(this.platform.Service.Lightbulb, 'NAME', 'USER_DEFINED_SUBTYPE_ID');
-     *
-     * The USER_DEFINED_SUBTYPE must be unique to the platform accessory (if you platform exposes multiple accessories, each accessory
-     * can use the same sub type id.)
-     */
-
-      // Example: add two "motion sensor" services to the accessory
-    const motionSensorOneService = this.accessory.getService('Motion Sensor One Name') ||
-      this.accessory.addService(this.platform.Service.MotionSensor, 'Motion Sensor One Name', 'YourUniqueIdentifier-1');
-
-    const motionSensorTwoService = this.accessory.getService('Motion Sensor Two Name') ||
-      this.accessory.addService(this.platform.Service.MotionSensor, 'Motion Sensor Two Name', 'YourUniqueIdentifier-2');
-
-    /**
-     * Updating characteristics values asynchronously.
-     *
-     * Example showing how to update the state of a Characteristic asynchronously instead
-     * of using the `on('get')` handlers.
-     * Here we change update the motion sensor trigger states on and off every 10 seconds
-     * the `updateCharacteristic` method.
-     *
-     */
-    let motionDetected = false;
-    setInterval(() => {
-      // EXAMPLE - inverse the trigger
-      motionDetected = !motionDetected;
-
-      // push the new value to HomeKit
-      motionSensorOneService.updateCharacteristic(this.platform.Characteristic.MotionDetected, motionDetected);
-      motionSensorTwoService.updateCharacteristic(this.platform.Characteristic.MotionDetected, !motionDetected);
-
-      this.platform.log.debug('Triggering motionSensorOneService:', motionDetected);
-      this.platform.log.debug('Triggering motionSensorTwoService:', !motionDetected);
-    }, 10000);
   }
 
   /**
@@ -98,12 +75,17 @@ export class ExamplePlatformAccessory {
    * These are sent when the user changes the state of an accessory, for example, turning on a Light bulb.
    */
   setOn(value: CharacteristicValue, callback: CharacteristicSetCallback) {
-
-    // implement your own code to turn your device on/off
-    this.exampleStates.On = value as boolean;
-
+    console.log({ value });
+    this.mqtt.publish('purifier/app/switch/' + this.platform.userNo, {
+      deviceNo: this.accessory.context.device.deviceId,
+      language: 'en',
+      openId: '4CA90DA0',
+      order: Commands.sendPower,
+      paramCode: PowerState.ON,
+      smartCode: '00',
+      productId: '92AD88F0',
+    });
     this.platform.log.debug('Set Characteristic On ->', value);
-
     // you must call the callback function
     callback(null);
   }
@@ -122,30 +104,68 @@ export class ExamplePlatformAccessory {
    * this.service.updateCharacteristic(this.platform.Characteristic.On, true)
    */
   getOn(callback: CharacteristicGetCallback) {
-
     // implement your own code to check if the device is on
-    const isOn = this.exampleStates.On;
 
-    this.platform.log.debug('Get Characteristic On ->', isOn);
+    this.platform.log.debug('Get Characteristic On ->', this.powerState);
 
     // you must call the callback function
     // the first argument should be null if there were no errors
     // the second argument should be the value to return
-    callback(null, isOn);
+    callback(null, this.powerState);
   }
 
   /**
-   * Handle "SET" requests from HomeKit
-   * These are sent when the user changes the state of an accessory, for example, changing the Brightness
+   * Handle requests to get the current value of the "Active" characteristic
    */
-  setBrightness(value: CharacteristicValue, callback: CharacteristicSetCallback) {
+  handleActiveGet(callback) {
+    this.log.debug('Triggered GET Active');
 
-    // implement your own code to set the brightness
-    this.exampleStates.Brightness = value as number;
+    // set this to a valid value for Active
+    const currentValue = 1;
 
-    this.platform.log.debug('Set Characteristic Brightness -> ', value);
+    callback(null, currentValue);
+  }
 
-    // you must call the callback function
+  /**
+   * Handle requests to set the "Active" characteristic
+   */
+  handleActiveSet(value, callback) {
+    this.log.debug('Triggered SET Active:', value);
+
+    callback(null);
+  }
+
+  /**
+   * Handle requests to get the current value of the "Current Air Purifier State" characteristic
+   */
+  handleCurrentAirPurifierStateGet(callback) {
+    this.log.debug('Triggered GET CurrentAirPurifierState');
+
+    // set this to a valid value for CurrentAirPurifierState
+    const currentValue = 1;
+
+    callback(null, currentValue);
+  }
+
+
+  /**
+   * Handle requests to get the current value of the "Target Air Purifier State" characteristic
+   */
+  handleTargetAirPurifierStateGet(callback) {
+    this.log.debug('Triggered GET TargetAirPurifierState');
+
+    // set this to a valid value for TargetAirPurifierState
+    const currentValue = 1;
+
+    callback(null, currentValue);
+  }
+
+  /**
+   * Handle requests to set the "Target Air Purifier State" characteristic
+   */
+  handleTargetAirPurifierStateSet(value, callback) {
+    this.log.debug('Triggered SET TargetAirPurifierState:', value);
+
     callback(null);
   }
 

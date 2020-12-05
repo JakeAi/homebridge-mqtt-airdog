@@ -28,6 +28,7 @@
   "dependencies": {
     "axios": "^0.21.0",
     "mqtt": "^4.2.6",
+    "mqtt-pattern": "^1.2.0",
     "rxjs": "^6.6.3",
     "ts-md5": "^1.2.7"
   },
