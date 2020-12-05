@@ -2,7 +2,7 @@ import { CharacteristicGetCallback, CharacteristicSetCallback, CharacteristicVal
 import { AirdogPlatform, DevicePlatformAccessory } from './platform';
 import { MANUFACTURER } from './settings';
 import { MQTT } from './mqtt';
-import { Commands, PowerState, SendPm, SwitchState } from './common';
+import { Commands, FanState, PowerState, SendPm, SwitchState } from './common';
 import { debounceTime, tap } from 'rxjs/operators';
 import { BehaviorSubject } from 'rxjs';
 
@@ -19,6 +19,15 @@ export class ExamplePlatformAccessory {
 
   private powerState = SwitchState.OFF;
   private powerState$: BehaviorSubject<SwitchState> = new BehaviorSubject<SwitchState>(SwitchState.OFF);
+
+  private fanState = FanState.AUTO;
+  private fanState$: BehaviorSubject<FanState> = new BehaviorSubject<FanState>(FanState.AUTO);
+
+  private sleepState = SwitchState.OFF;
+  private sleepState$: BehaviorSubject<SwitchState> = new BehaviorSubject<SwitchState>(SwitchState.OFF);
+
+  private lockState = SwitchState.OFF;
+  private lockState$: BehaviorSubject<SwitchState> = new BehaviorSubject<SwitchState>(SwitchState.OFF);
 
   constructor(
     private  platform: AirdogPlatform,
@@ -45,18 +54,38 @@ export class ExamplePlatformAccessory {
       .on('set', this.setOn.bind(this))
       .on('get', this.getOn.bind(this));
 
+    this.airPurifierService.getCharacteristic(this.platform.Characteristic.CurrentAirPurifierState)
+      .on('set', this.setOn.bind(this))
+      .on('get', this.getOn.bind(this));
+
+    this.airPurifierService.getCharacteristic(this.platform.Characteristic.TargetAirPurifierState)
+      .on('set', this.setOn.bind(this))
+      .on('get', this.getOn.bind(this));
+
+    this.airPurifierService.getCharacteristic(this.platform.Characteristic.LockPhysicalControls)
+      .on('set', this.setOn.bind(this))
+      .on('get', this.getOn.bind(this));
+
+    this.airPurifierService.getCharacteristic(this.platform.Characteristic.Name)
+      .on('set', this.setOn.bind(this))
+      .on('get', this.getOn.bind(this));
+
+    this.airPurifierService.getCharacteristic(this.platform.Characteristic.RotationSpeed)
+      .on('set', this.setOn.bind(this))
+      .on('get', this.getOn.bind(this));
+
     this.mqtt.register<SendPm>('purifier/server/app/sendPm/' + this.accessory.context.device.deviceId)
       .pipe(
         debounceTime(1000),
         tap(date => console.log({ date })),
       )
       .subscribe((d) => {
-        try {
-          this.powerState = d.power.indexOf('open') !== -1 ? SwitchState.ON : SwitchState.OFF;
-        } catch (e) {
-          this.powerState = SwitchState.OFF;
-        }
+        this.powerState = d?.power?.indexOf('open') !== -1 ? SwitchState.ON : SwitchState.OFF;
+        this.lockState = d?.children?.indexOf('open') !== -1 ? SwitchState.ON : SwitchState.OFF;
+        this.fanState = d?.speed?.indexOf('auto') !== -1 ? FanState.AUTO : FanState.LOW;
         this.powerState$.next(this.powerState);
+        this.lockState$.next(this.lockState);
+        this.fanState$.next(this.fanState);
       });
     // this.airPurifierService.getCharacteristic(this.platform.Characteristic.Active)
     //   .on('get', this.handleActiveGet.bind(this))
@@ -79,7 +108,10 @@ export class ExamplePlatformAccessory {
     // register handlers for the On/Off Characteristic
     // this.airQualityservice = this.accessory.getService(this.platform.Service.AirQualitySensor) || this.accessory.addService(this.platform.Service.AirQualitySensor);
     // this.airQualityservice.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device.deviceName);
-    this.powerState$.subscribe((state) => this.airPurifierService.updateCharacteristic(this.platform.Characteristic.Active, state));
+    this.powerState$
+      .subscribe((state) => {
+        this.airPurifierService.updateCharacteristic(this.platform.Characteristic.CurrentAirPurifierState, state);
+      });
   }
 
   /**
@@ -99,7 +131,7 @@ export class ExamplePlatformAccessory {
     });
     this.platform.log.debug('Set Characteristic On ->', value);
     // you must call the callback function
-    callback(null);
+    callback(null, value);
   }
 
   /**

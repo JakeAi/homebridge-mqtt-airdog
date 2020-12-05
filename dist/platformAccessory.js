@@ -20,6 +20,12 @@ class ExamplePlatformAccessory {
         this.mqtt = new mqtt_1.MQTT('mqtt://47.89.244.17');
         this.powerState = common_1.SwitchState.OFF;
         this.powerState$ = new rxjs_1.BehaviorSubject(common_1.SwitchState.OFF);
+        this.fanState = common_1.FanState.AUTO;
+        this.fanState$ = new rxjs_1.BehaviorSubject(common_1.FanState.AUTO);
+        this.sleepState = common_1.SwitchState.OFF;
+        this.sleepState$ = new rxjs_1.BehaviorSubject(common_1.SwitchState.OFF);
+        this.lockState = common_1.SwitchState.OFF;
+        this.lockState$ = new rxjs_1.BehaviorSubject(common_1.SwitchState.OFF);
         // set accessory information
         this.accessory.getService(this.platform.Service.AccessoryInformation)
             .setCharacteristic(this.platform.Characteristic.Manufacturer, settings_1.MANUFACTURER)
@@ -34,16 +40,31 @@ class ExamplePlatformAccessory {
         this.airPurifierService.getCharacteristic(this.platform.Characteristic.Active)
             .on('set', this.setOn.bind(this))
             .on('get', this.getOn.bind(this));
+        this.airPurifierService.getCharacteristic(this.platform.Characteristic.CurrentAirPurifierState)
+            .on('set', this.setOn.bind(this))
+            .on('get', this.getOn.bind(this));
+        this.airPurifierService.getCharacteristic(this.platform.Characteristic.TargetAirPurifierState)
+            .on('set', this.setOn.bind(this))
+            .on('get', this.getOn.bind(this));
+        this.airPurifierService.getCharacteristic(this.platform.Characteristic.LockPhysicalControls)
+            .on('set', this.setOn.bind(this))
+            .on('get', this.getOn.bind(this));
+        this.airPurifierService.getCharacteristic(this.platform.Characteristic.Name)
+            .on('set', this.setOn.bind(this))
+            .on('get', this.getOn.bind(this));
+        this.airPurifierService.getCharacteristic(this.platform.Characteristic.RotationSpeed)
+            .on('set', this.setOn.bind(this))
+            .on('get', this.getOn.bind(this));
         this.mqtt.register('purifier/server/app/sendPm/' + this.accessory.context.device.deviceId)
             .pipe(operators_1.debounceTime(1000), operators_1.tap(date => console.log({ date })))
             .subscribe((d) => {
-            try {
-                this.powerState = d.power.indexOf('open') !== -1 ? common_1.SwitchState.ON : common_1.SwitchState.OFF;
-            }
-            catch (e) {
-                this.powerState = common_1.SwitchState.OFF;
-            }
+            var _a, _b, _c;
+            this.powerState = ((_a = d === null || d === void 0 ? void 0 : d.power) === null || _a === void 0 ? void 0 : _a.indexOf('open')) !== -1 ? common_1.SwitchState.ON : common_1.SwitchState.OFF;
+            this.lockState = ((_b = d === null || d === void 0 ? void 0 : d.children) === null || _b === void 0 ? void 0 : _b.indexOf('open')) !== -1 ? common_1.SwitchState.ON : common_1.SwitchState.OFF;
+            this.fanState = ((_c = d === null || d === void 0 ? void 0 : d.speed) === null || _c === void 0 ? void 0 : _c.indexOf('auto')) !== -1 ? common_1.FanState.AUTO : common_1.FanState.LOW;
             this.powerState$.next(this.powerState);
+            this.lockState$.next(this.lockState);
+            this.fanState$.next(this.fanState);
         });
         // this.airPurifierService.getCharacteristic(this.platform.Characteristic.Active)
         //   .on('get', this.handleActiveGet.bind(this))
@@ -64,7 +85,10 @@ class ExamplePlatformAccessory {
         // register handlers for the On/Off Characteristic
         // this.airQualityservice = this.accessory.getService(this.platform.Service.AirQualitySensor) || this.accessory.addService(this.platform.Service.AirQualitySensor);
         // this.airQualityservice.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device.deviceName);
-        this.powerState$.subscribe((state) => this.airPurifierService.updateCharacteristic(this.platform.Characteristic.Active, state));
+        this.powerState$
+            .subscribe((state) => {
+            this.airPurifierService.updateCharacteristic(this.platform.Characteristic.CurrentAirPurifierState, state);
+        });
     }
     /**
      * Handle "SET" requests from HomeKit
@@ -83,7 +107,7 @@ class ExamplePlatformAccessory {
         });
         this.platform.log.debug('Set Characteristic On ->', value);
         // you must call the callback function
-        callback(null);
+        callback(null, value);
     }
     /**
      * Handle the "GET" requests from HomeKit

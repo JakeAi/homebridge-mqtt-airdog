@@ -13,6 +13,12 @@ export declare class ExamplePlatformAccessory {
     private mqtt;
     private powerState;
     private powerState$;
+    private fanState;
+    private fanState$;
+    private sleepState;
+    private sleepState$;
+    private lockState;
+    private lockState$;
     constructor(platform: AirdogPlatform, accessory: DevicePlatformAccessory, log: Logger);
     /**
      * Handle "SET" requests from HomeKit
