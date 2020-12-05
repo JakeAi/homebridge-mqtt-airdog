@@ -104,7 +104,7 @@ class ExamplePlatformAccessory {
             smartCode: '00',
             productId: '92AD88F0',
         });
-        this.platform.log.debug('Set Characteristic On ->', value);
+        console.log('Set Characteristic On ->', value);
         this.powerState$.next(this.powerState = value * 2);
         // you must call the callback function
         callback(null);
