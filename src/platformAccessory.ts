@@ -110,7 +110,7 @@ export class ExamplePlatformAccessory {
     // this.airQualityservice.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device.deviceName);
     this.powerState$
       .subscribe((state) => {
-        this.airPurifierService.updateCharacteristic(this.platform.Characteristic.CurrentAirPurifierState, state);
+        this.airPurifierService.updateCharacteristic(this.platform.Characteristic.CurrentAirPurifierState, state*2);
       });
   }
 
