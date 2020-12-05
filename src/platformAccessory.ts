@@ -43,6 +43,7 @@ export class ExamplePlatformAccessory {
 
     this.mqtt.register<SendPm>('purifier/server/app/sendPm/' + this.accessory.context.device.deviceId)
       .subscribe((d) => {
+        console.log(d)
         this.powerState = d.power.indexOf('open') !== -1 ? PowerState.ON : PowerState.OFF;
         this.airPurifierService.updateCharacteristic(this.platform.Characteristic.Active, this.powerState);
       });
