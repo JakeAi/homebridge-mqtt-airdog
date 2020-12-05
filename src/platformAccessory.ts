@@ -48,7 +48,11 @@ export class ExamplePlatformAccessory {
         tap(d => console.log(d)),
       )
       .subscribe((d) => {
-        this.powerState = d.power.indexOf('open') !== -1 ? SwitchState.ON : SwitchState.OFF;
+        try {
+          this.powerState = d.power.indexOf('open') !== -1 ? SwitchState.ON : SwitchState.OFF;
+        } catch (e) {
+          this.powerState = SwitchState.OFF;
+        }
         this.airPurifierService.updateCharacteristic(this.platform.Characteristic.Active, this.powerState);
       });
     // this.airPurifierService.getCharacteristic(this.platform.Characteristic.Active)
