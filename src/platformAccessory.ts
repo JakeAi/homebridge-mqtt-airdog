@@ -3,6 +3,7 @@ import { AirdogPlatform, DevicePlatformAccessory } from './platform';
 import { MANUFACTURER } from './settings';
 import { MQTT } from './mqtt';
 import { Commands, PowerState, SendPm } from './common';
+import { tap } from 'rxjs/operators';
 
 /**
  * Platform Accessory
@@ -42,8 +43,9 @@ export class ExamplePlatformAccessory {
       .on('set', this.setOn.bind(this));
 
     this.mqtt.register<SendPm>('purifier/server/app/sendPm/' + this.accessory.context.device.deviceId)
+      .pipe(tap(d => console.log(d)))
       .subscribe((d) => {
-        console.log(d)
+        console.log(d);
         this.powerState = d.power.indexOf('open') !== -1 ? PowerState.ON : PowerState.OFF;
         this.airPurifierService.updateCharacteristic(this.platform.Characteristic.Active, this.powerState);
       });

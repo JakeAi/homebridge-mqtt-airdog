@@ -4,6 +4,7 @@ exports.ExamplePlatformAccessory = void 0;
 const settings_1 = require("./settings");
 const mqtt_1 = require("./mqtt");
 const common_1 = require("./common");
+const operators_1 = require("rxjs/operators");
 /**
  * Platform Accessory
  * An instance of this class is created for each accessory your platform registers
@@ -31,7 +32,9 @@ class ExamplePlatformAccessory {
         this.airPurifierService.getCharacteristic(this.platform.Characteristic.Active)
             .on('set', this.setOn.bind(this));
         this.mqtt.register('purifier/server/app/sendPm/' + this.accessory.context.device.deviceId)
+            .pipe(operators_1.tap(d => console.log(d)))
             .subscribe((d) => {
+            console.log(d);
             this.powerState = d.power.indexOf('open') !== -1 ? common_1.PowerState.ON : common_1.PowerState.OFF;
             this.airPurifierService.updateCharacteristic(this.platform.Characteristic.Active, this.powerState);
         });
