@@ -63,8 +63,30 @@ export class ExamplePlatformAccessory {
     // get the LightBulb service if it exists, otherwise create a new LightBulb service
     // you can create multiple services for each accessory
     this.airPurifierService = this.accessory.getService(this.platform.Service.AirPurifier) || this.accessory.addService(this.platform.Service.AirPurifier);
-    this.sleepSwitchService = this.accessory.getService('SleepSwitch') || this.accessory.addService(this.platform.Service.Switch, 'SleepSwitch');
-    this.lockSwitchService = this.accessory.getService('LockSwitch') || this.accessory.addService(this.platform.Service.Switch, 'LockSwitch');
+
+
+    this.sleepSwitchService = <Service>this.accessory.getServiceById(this.platform.Service.Switch, 'Sleep');
+    if (!this.sleepSwitchService) {
+      this.sleepSwitchService = new this.platform.Service.Switch('SleepSwitch', 'Sleep');
+      if (this.sleepSwitchService) {
+        this.sleepSwitchService = this.accessory.addService(this.sleepSwitchService);
+        console.log('New Open Switch Service');
+      } else {
+        console.log('New Open Switch Service -- Failed!');
+      }
+    }
+    this.lockSwitchService = <Service>this.accessory.getServiceById(this.platform.Service.Switch, 'Lock');
+    if (!this.lockSwitchService) {
+      this.lockSwitchService = new this.platform.Service.Switch('LockSwitch', 'Lock');
+      if (this.lockSwitchService) {
+        this.lockSwitchService = this.accessory.addService(this.lockSwitchService);
+        console.log('New Open Switch Service');
+      } else {
+        console.log('New Open Switch Service -- Failed!');
+      }
+    }
+
+
 
     // create handlers for required characteristics
     this.sleepSwitchService.getCharacteristic(this.platform.Characteristic.On)
