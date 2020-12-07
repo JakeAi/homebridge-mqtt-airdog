@@ -56,7 +56,7 @@ class ExamplePlatformAccessory {
             .on('set', this.setOn.bind(this))
             .on('get', this.getOn.bind(this));
         this.mqtt.register('purifier/server/app/sendPm/' + this.accessory.context.device.deviceId)
-            .pipe(operators_1.debounceTime(1000), operators_1.tap(date => console.log({ date })))
+            .pipe(operators_1.debounceTime(3000), operators_1.tap(date => console.log({ date })))
             .subscribe((d) => {
             var _a, _b, _c;
             this.powerState = ((_a = d === null || d === void 0 ? void 0 : d.power) === null || _a === void 0 ? void 0 : _a.indexOf('open')) !== -1 ? common_1.SwitchState.ON : common_1.SwitchState.OFF;
@@ -67,21 +67,23 @@ class ExamplePlatformAccessory {
             this.lockState$.next(this.lockState);
             this.fanState$.next(this.fanState);
             this.airQualityservice.updateCharacteristic(this.platform.Characteristic.PM2_5Density, this.pm);
+            let airQualityLevel = 0;
             if (this.pm >= 200) {
-                this.airQualityservice.updateCharacteristic(this.platform.Characteristic.AirQuality, 5);
+                airQualityLevel = 5;
             }
             if (this.pm >= 120 && this.pm < 200) {
-                this.airQualityservice.updateCharacteristic(this.platform.Characteristic.AirQuality, 3);
+                airQualityLevel = 3;
             }
             if (this.pm >= 65 && this.pm < 120) {
-                this.airQualityservice.updateCharacteristic(this.platform.Characteristic.AirQuality, 2);
+                airQualityLevel = 2;
             }
             if (this.pm > 0 && this.pm < 65) {
-                this.airQualityservice.updateCharacteristic(this.platform.Characteristic.AirQuality, 1);
+                airQualityLevel = 1;
             }
             if (this.pm === 0) {
-                this.airQualityservice.updateCharacteristic(this.platform.Characteristic.AirQuality, 0);
+                airQualityLevel = 10;
             }
+            this.airQualityservice.updateCharacteristic(this.platform.Characteristic.AirQuality, airQualityLevel);
         });
         // this.airPurifierService.getCharacteristic(this.platform.Characteristic.Active)
         //   .on('get', this.handleActiveGet.bind(this))

@@ -78,7 +78,7 @@ export class ExamplePlatformAccessory {
 
     this.mqtt.register<SendPm>('purifier/server/app/sendPm/' + this.accessory.context.device.deviceId)
       .pipe(
-        debounceTime(1000),
+        debounceTime(3000),
         tap(date => console.log({ date })),
       )
       .subscribe((d) => {
@@ -91,12 +91,14 @@ export class ExamplePlatformAccessory {
         this.fanState$.next(this.fanState);
 
         this.airQualityservice.updateCharacteristic(this.platform.Characteristic.PM2_5Density, this.pm);
+        let airQualityLevel = 0;
+        if (this.pm >= 200) { airQualityLevel = 5;}
+        if (this.pm >= 120 && this.pm < 200) { airQualityLevel = 3; }
+        if (this.pm >= 65 && this.pm < 120) { airQualityLevel = 2;}
+        if (this.pm > 0 && this.pm < 65) { airQualityLevel = 1;}
+        if (this.pm === 0) { airQualityLevel = 10;}
 
-        if (this.pm >= 200) { this.airQualityservice.updateCharacteristic(this.platform.Characteristic.AirQuality, 5);}
-        if (this.pm >= 120 && this.pm < 200) { this.airQualityservice.updateCharacteristic(this.platform.Characteristic.AirQuality, 3);}
-        if (this.pm >= 65 && this.pm < 120) { this.airQualityservice.updateCharacteristic(this.platform.Characteristic.AirQuality, 2);}
-        if (this.pm > 0 && this.pm < 65) { this.airQualityservice.updateCharacteristic(this.platform.Characteristic.AirQuality, 1);}
-        if (this.pm === 0) { this.airQualityservice.updateCharacteristic(this.platform.Characteristic.AirQuality, 0);}
+        this.airQualityservice.updateCharacteristic(this.platform.Characteristic.AirQuality, airQualityLevel);
 
       });
     // this.airPurifierService.getCharacteristic(this.platform.Characteristic.Active)
