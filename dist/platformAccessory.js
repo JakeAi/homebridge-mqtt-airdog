@@ -26,6 +26,9 @@ class ExamplePlatformAccessory {
         this.lockState = common_1.SwitchState.OFF;
         this.lockState$ = new rxjs_1.BehaviorSubject(common_1.SwitchState.OFF);
         this.pm = 0;
+        this.pm$ = new rxjs_1.BehaviorSubject(0);
+        this.airQuality = 0;
+        this.airQuality$ = new rxjs_1.BehaviorSubject(0);
         // set accessory information
         this.accessory.getService(this.platform.Service.AccessoryInformation)
             .setCharacteristic(this.platform.Characteristic.Manufacturer, settings_1.MANUFACTURER)
@@ -56,34 +59,16 @@ class ExamplePlatformAccessory {
             .on('set', this.setOn.bind(this))
             .on('get', this.getOn.bind(this));
         this.mqtt.register('purifier/server/app/sendPm/' + this.accessory.context.device.deviceId)
-            .pipe(operators_1.debounceTime(3000), operators_1.tap(date => console.log({ date })))
+            .pipe(operators_1.debounceTime(5000), operators_1.tap(date => console.log({ date })))
             .subscribe((d) => {
             var _a, _b, _c;
             this.powerState = ((_a = d === null || d === void 0 ? void 0 : d.power) === null || _a === void 0 ? void 0 : _a.indexOf('open')) !== -1 ? common_1.SwitchState.ON : common_1.SwitchState.OFF;
             this.lockState = ((_b = d === null || d === void 0 ? void 0 : d.children) === null || _b === void 0 ? void 0 : _b.indexOf('open')) !== -1 ? common_1.SwitchState.ON : common_1.SwitchState.OFF;
             this.fanState = ((_c = d === null || d === void 0 ? void 0 : d.speed) === null || _c === void 0 ? void 0 : _c.indexOf('auto')) !== -1 ? common_1.FanState.AUTO : common_1.FanState.LOW;
-            this.pm = parseFloat(d === null || d === void 0 ? void 0 : d.pm);
             this.powerState$.next(this.powerState);
             this.lockState$.next(this.lockState);
             this.fanState$.next(this.fanState);
-            this.airQualityservice.updateCharacteristic(this.platform.Characteristic.PM2_5Density, this.pm);
-            let airQualityLevel = 0;
-            if (this.pm >= 200) {
-                airQualityLevel = 5;
-            }
-            if (this.pm >= 120 && this.pm < 200) {
-                airQualityLevel = 3;
-            }
-            if (this.pm >= 65 && this.pm < 120) {
-                airQualityLevel = 2;
-            }
-            if (this.pm > 0 && this.pm < 65) {
-                airQualityLevel = 1;
-            }
-            if (this.pm === 0) {
-                airQualityLevel = 10;
-            }
-            this.airQualityservice.updateCharacteristic(this.platform.Characteristic.AirQuality, airQualityLevel);
+            this.pm$.next(parseFloat(d === null || d === void 0 ? void 0 : d.pm));
         });
         // this.airPurifierService.getCharacteristic(this.platform.Characteristic.Active)
         //   .on('get', this.handleActiveGet.bind(this))
@@ -105,11 +90,39 @@ class ExamplePlatformAccessory {
         this.airQualityservice = this.accessory.getService(this.platform.Service.AirQualitySensor) || this.accessory.addService(this.platform.Service.AirQualitySensor);
         this.airQualityservice.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device.deviceName);
         this.airQualityservice.getCharacteristic(this.platform.Characteristic.AirQuality)
+            .on('get', this.getAirQuality.bind(this));
+        this.airQualityservice.getCharacteristic(this.platform.Characteristic.PM2_5Density)
             .on('get', this.getPm.bind(this));
+        this.pm$
+            .subscribe((pm) => {
+            let airQualityLevel = 0;
+            if (pm >= 200) {
+                airQualityLevel = 5;
+            }
+            if (pm >= 120 && pm < 200) {
+                airQualityLevel = 3;
+            }
+            if (pm >= 65 && pm < 120) {
+                airQualityLevel = 2;
+            }
+            if (pm > 0 && pm < 65) {
+                airQualityLevel = 1;
+            }
+            if (pm === 0) {
+                airQualityLevel = 0;
+            }
+            this.airQuality = airQualityLevel;
+            this.pm = pm;
+            this.airQualityservice.updateCharacteristic(this.platform.Characteristic.AirQuality, this.airQuality);
+            this.airQualityservice.updateCharacteristic(this.platform.Characteristic.PM2_5Density, this.pm);
+        });
         this.powerState$
             .subscribe((state) => {
             this.airPurifierService.updateCharacteristic(this.platform.Characteristic.CurrentAirPurifierState, state * 2);
         });
+    }
+    getAirQuality(callback) {
+        callback(null, this.airQuality);
     }
     /**
      * Handle "SET" requests from HomeKit
@@ -149,7 +162,7 @@ class ExamplePlatformAccessory {
         // you must call the callback function
         // the first argument should be null if there were no errors
         // the second argument should be the value to return
-        callback(null, this.powerState);
+        callback(null, this.powerState * 2);
     }
     getPm(callback) {
         this.platform.log.debug('Get Characteristic On ->', this.powerState);

@@ -21,7 +21,11 @@ export declare class ExamplePlatformAccessory {
     private lockState;
     private lockState$;
     private pm;
+    private pm$;
+    private airQuality;
+    private airQuality$;
     constructor(platform: AirdogPlatform, accessory: DevicePlatformAccessory, log: Logger);
+    getAirQuality(callback: CharacteristicGetCallback): void;
     /**
      * Handle "SET" requests from HomeKit
      * These are sent when the user changes the state of an accessory, for example, turning on a Light bulb.

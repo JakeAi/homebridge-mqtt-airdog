@@ -30,6 +30,10 @@ export class ExamplePlatformAccessory {
   private lockState$: BehaviorSubject<SwitchState> = new BehaviorSubject<SwitchState>(SwitchState.OFF);
 
   private pm: number = 0;
+  private pm$: BehaviorSubject<number> = new BehaviorSubject<number>(0);
+
+  private airQuality: number = 0;
+  private airQuality$: BehaviorSubject<number> = new BehaviorSubject<number>(0);
 
   constructor(
     private  platform: AirdogPlatform,
@@ -78,27 +82,20 @@ export class ExamplePlatformAccessory {
 
     this.mqtt.register<SendPm>('purifier/server/app/sendPm/' + this.accessory.context.device.deviceId)
       .pipe(
-        debounceTime(3000),
+        debounceTime(5000),
         tap(date => console.log({ date })),
       )
       .subscribe((d) => {
         this.powerState = d?.power?.indexOf('open') !== -1 ? SwitchState.ON : SwitchState.OFF;
         this.lockState = d?.children?.indexOf('open') !== -1 ? SwitchState.ON : SwitchState.OFF;
         this.fanState = d?.speed?.indexOf('auto') !== -1 ? FanState.AUTO : FanState.LOW;
-        this.pm = parseFloat(d?.pm);
+
         this.powerState$.next(this.powerState);
         this.lockState$.next(this.lockState);
         this.fanState$.next(this.fanState);
 
-        this.airQualityservice.updateCharacteristic(this.platform.Characteristic.PM2_5Density, this.pm);
-        let airQualityLevel = 0;
-        if (this.pm >= 200) { airQualityLevel = 5;}
-        if (this.pm >= 120 && this.pm < 200) { airQualityLevel = 3; }
-        if (this.pm >= 65 && this.pm < 120) { airQualityLevel = 2;}
-        if (this.pm > 0 && this.pm < 65) { airQualityLevel = 1;}
-        if (this.pm === 0) { airQualityLevel = 10;}
+        this.pm$.next(parseFloat(d?.pm));
 
-        this.airQualityservice.updateCharacteristic(this.platform.Characteristic.AirQuality, airQualityLevel);
 
       });
     // this.airPurifierService.getCharacteristic(this.platform.Characteristic.Active)
@@ -122,13 +119,38 @@ export class ExamplePlatformAccessory {
     // register handlers for the On/Off Characteristic
     this.airQualityservice = this.accessory.getService(this.platform.Service.AirQualitySensor) || this.accessory.addService(this.platform.Service.AirQualitySensor);
     this.airQualityservice.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device.deviceName);
+
     this.airQualityservice.getCharacteristic(this.platform.Characteristic.AirQuality)
+      .on('get', this.getAirQuality.bind(this));
+
+    this.airQualityservice.getCharacteristic(this.platform.Characteristic.PM2_5Density)
       .on('get', this.getPm.bind(this));
+
+
+    this.pm$
+      .subscribe((pm) => {
+        let airQualityLevel = 0;
+        if (pm >= 200) { airQualityLevel = 5;}
+        if (pm >= 120 && pm < 200) { airQualityLevel = 3; }
+        if (pm >= 65 && pm < 120) { airQualityLevel = 2;}
+        if (pm > 0 && pm < 65) { airQualityLevel = 1;}
+        if (pm === 0) { airQualityLevel = 0;}
+
+        this.airQuality = airQualityLevel;
+        this.pm = pm;
+
+        this.airQualityservice.updateCharacteristic(this.platform.Characteristic.AirQuality, this.airQuality);
+        this.airQualityservice.updateCharacteristic(this.platform.Characteristic.PM2_5Density, this.pm);
+      });
 
     this.powerState$
       .subscribe((state) => {
         this.airPurifierService.updateCharacteristic(this.platform.Characteristic.CurrentAirPurifierState, state * 2);
       });
+  }
+
+  getAirQuality(callback: CharacteristicGetCallback) {
+    callback(null, this.airQuality);
   }
 
   /**
@@ -172,7 +194,7 @@ export class ExamplePlatformAccessory {
     // you must call the callback function
     // the first argument should be null if there were no errors
     // the second argument should be the value to return
-    callback(null, this.powerState);
+    callback(null, this.powerState*2);
   }
 
   getPm(callback: CharacteristicGetCallback) {
