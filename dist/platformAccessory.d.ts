@@ -16,8 +16,12 @@ export declare class ExamplePlatformAccessory {
     private powerState$;
     private fanState;
     private fanState$;
-    private sleepState;
-    private sleepState$;
+    private sleepSwitchService;
+    private sleepSwitchState;
+    private sleepSwitchState$;
+    private lockSwitchService;
+    private lockSwitchState;
+    private lockSwitchState$;
     private lockState;
     private lockState$;
     private pm;
@@ -27,6 +31,10 @@ export declare class ExamplePlatformAccessory {
     private fanSpeed;
     private fanSpeed$;
     constructor(platform: AirdogPlatform, accessory: DevicePlatformAccessory, log: Logger);
+    getLockSwitchState(callback: CharacteristicGetCallback): void;
+    setLockSwitchState(value: CharacteristicValue, callback: CharacteristicSetCallback): void;
+    getSleepSwitchState(callback: CharacteristicGetCallback): void;
+    setSleepSwitchState(value: CharacteristicValue, callback: CharacteristicSetCallback): void;
     getRotationSpeed(callback: CharacteristicGetCallback): void;
     setRotationSpeed(value: CharacteristicValue, callback: CharacteristicSetCallback): void;
     getAirQuality(callback: CharacteristicGetCallback): void;

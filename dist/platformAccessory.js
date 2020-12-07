@@ -21,8 +21,10 @@ class ExamplePlatformAccessory {
         this.powerState$ = new rxjs_1.BehaviorSubject(common_1.SwitchState.OFF);
         this.fanState = common_1.FanState.AUTO;
         this.fanState$ = new rxjs_1.BehaviorSubject(common_1.FanState.AUTO);
-        this.sleepState = common_1.SwitchState.OFF;
-        this.sleepState$ = new rxjs_1.BehaviorSubject(common_1.SwitchState.OFF);
+        this.sleepSwitchState = common_1.SwitchState.OFF;
+        this.sleepSwitchState$ = new rxjs_1.BehaviorSubject(common_1.SwitchState.OFF);
+        this.lockSwitchState = common_1.SwitchState.OFF;
+        this.lockSwitchState$ = new rxjs_1.BehaviorSubject(common_1.SwitchState.OFF);
         this.lockState = common_1.SwitchState.OFF;
         this.lockState$ = new rxjs_1.BehaviorSubject(common_1.SwitchState.OFF);
         this.pm = 0;
@@ -39,6 +41,15 @@ class ExamplePlatformAccessory {
         // get the LightBulb service if it exists, otherwise create a new LightBulb service
         // you can create multiple services for each accessory
         this.airPurifierService = this.accessory.getService(this.platform.Service.AirPurifier) || this.accessory.addService(this.platform.Service.AirPurifier);
+        this.sleepSwitchService = this.accessory.getService(this.platform.Service.Switch) || this.accessory.addService(this.platform.Service.Switch);
+        this.lockSwitchService = this.accessory.getService(this.platform.Service.Switch) || this.accessory.addService(this.platform.Service.Switch);
+        // create handlers for required characteristics
+        this.sleepSwitchService.getCharacteristic(this.platform.Characteristic.On)
+            .on('get', this.getSleepSwitchState.bind(this))
+            .on('set', this.setSleepSwitchState.bind(this));
+        this.lockSwitchService.getCharacteristic(this.platform.Characteristic.On)
+            .on('get', this.getLockSwitchState.bind(this))
+            .on('set', this.setLockSwitchState.bind(this));
         // set the service name, this is what is displayed as the default name on the Home app
         // in this example we are using the name we stored in the `accessory.context` in the `discoverDevices` method.
         this.airPurifierService.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device.deviceName);
@@ -128,6 +139,10 @@ class ExamplePlatformAccessory {
             this.airQualityservice.updateCharacteristic(this.platform.Characteristic.PM2_5Density, this.pm);
         });
     }
+    getLockSwitchState(callback) { return callback(null, this.lockSwitchState); }
+    setLockSwitchState(value, callback) { }
+    getSleepSwitchState(callback) { return callback(null, this.sleepSwitchState); }
+    setSleepSwitchState(value, callback) { }
     getRotationSpeed(callback) {
         callback(null, this.fanSpeed);
     }
