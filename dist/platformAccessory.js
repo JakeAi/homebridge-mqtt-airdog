@@ -41,8 +41,8 @@ class ExamplePlatformAccessory {
         // get the LightBulb service if it exists, otherwise create a new LightBulb service
         // you can create multiple services for each accessory
         this.airPurifierService = this.accessory.getService(this.platform.Service.AirPurifier) || this.accessory.addService(this.platform.Service.AirPurifier);
-        this.sleepSwitchService = this.accessory.getService(this.platform.Service.Switch) || this.accessory.addService(this.platform.Service.Switch);
-        this.lockSwitchService = this.accessory.getService(this.platform.Service.Switch) || this.accessory.addService(this.platform.Service.Switch);
+        this.sleepSwitchService = this.accessory.getService('SleepSwitch') || this.accessory.addService(this.platform.Service.Switch, 'SleepSwitch');
+        this.lockSwitchService = this.accessory.getService('LockSwitch') || this.accessory.addService(this.platform.Service.Switch, 'LockSwitch');
         // create handlers for required characteristics
         this.sleepSwitchService.getCharacteristic(this.platform.Characteristic.On)
             .on('get', this.getSleepSwitchState.bind(this))
