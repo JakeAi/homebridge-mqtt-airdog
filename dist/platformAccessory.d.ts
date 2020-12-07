@@ -46,25 +46,5 @@ export declare class ExamplePlatformAccessory {
      */
     getOn(callback: CharacteristicGetCallback): void;
     getPm(callback: CharacteristicGetCallback): void;
-    /**
-     * Handle requests to get the current value of the "Active" characteristic
-     */
-    handleActiveGet(callback: any): void;
-    /**
-     * Handle requests to set the "Active" characteristic
-     */
-    handleActiveSet(value: any, callback: any): void;
-    /**
-     * Handle requests to get the current value of the "Current Air Purifier State" characteristic
-     */
-    handleCurrentAirPurifierStateGet(callback: any): void;
-    /**
-     * Handle requests to get the current value of the "Target Air Purifier State" characteristic
-     */
-    handleTargetAirPurifierStateGet(callback: any): void;
-    /**
-     * Handle requests to set the "Target Air Purifier State" characteristic
-     */
-    handleTargetAirPurifierStateSet(value: any, callback: any): void;
 }
 //# sourceMappingURL=platformAccessory.d.ts.map

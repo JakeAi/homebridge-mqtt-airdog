@@ -47,6 +47,7 @@ export class ExamplePlatformAccessory {
       .setCharacteristic(this.platform.Characteristic.Model, 'X5')
       .setCharacteristic(this.platform.Characteristic.SerialNumber, 'X5');
 
+
     // get the LightBulb service if it exists, otherwise create a new LightBulb service
     // you can create multiple services for each accessory
     this.airPurifierService = this.accessory.getService(this.platform.Service.AirPurifier) || this.accessory.addService(this.platform.Service.AirPurifier);
@@ -82,12 +83,13 @@ export class ExamplePlatformAccessory {
 
     this.mqtt.register<SendPm>('purifier/server/app/sendPm/' + this.accessory.context.device.deviceId)
       .pipe(
-        debounceTime(5000),
+        debounceTime(3000),
         tap(date => console.log({ date })),
       )
       .subscribe((d) => {
         this.powerState = d?.power?.indexOf('open') !== -1 ? SwitchState.ON : SwitchState.OFF;
         this.lockState = d?.children?.indexOf('open') !== -1 ? SwitchState.ON : SwitchState.OFF;
+        this.fanState = d?.speed?.indexOf('auto') !== -1 ? FanState.AUTO : FanState.LOW;
         this.fanState = d?.speed?.indexOf('auto') !== -1 ? FanState.AUTO : FanState.LOW;
 
         this.powerState$.next(this.powerState);
@@ -95,28 +97,8 @@ export class ExamplePlatformAccessory {
         this.fanState$.next(this.fanState);
 
         this.pm$.next(parseFloat(d?.pm));
-
-
       });
-    // this.airPurifierService.getCharacteristic(this.platform.Characteristic.Active)
-    //   .on('get', this.handleActiveGet.bind(this))
-    //   .on('set', this.handleActiveSet.bind(this));
-    //
-    // this.airPurifierService.getCharacteristic(this.platform.Characteristic.RotationSpeed)
-    //   .on('get', this.handleActiveGet.bind(this))
-    //   .on('set', this.handleActiveSet.bind(this));
-    //
-    // this.airPurifierService.getCharacteristic(this.platform.Characteristic.CurrentAirPurifierState)
-    //   .on('get', this.handleCurrentAirPurifierStateGet.bind(this));
-    //
-    // this.airPurifierService.getCharacteristic(this.platform.Characteristic.TargetAirPurifierState)
-    //   .on('get', this.handleTargetAirPurifierStateGet.bind(this))
-    //   .on('set', this.handleTargetAirPurifierStateSet.bind(this));
 
-    // each service must implement at-minimum the "required characteristics" for the given service type
-    // see https://developers.homebridge.io/#/service/Lightbulb
-
-    // register handlers for the On/Off Characteristic
     this.airQualityservice = this.accessory.getService(this.platform.Service.AirQualitySensor) || this.accessory.addService(this.platform.Service.AirQualitySensor);
     this.airQualityservice.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device.deviceName);
 
@@ -125,6 +107,11 @@ export class ExamplePlatformAccessory {
 
     this.airQualityservice.getCharacteristic(this.platform.Characteristic.PM2_5Density)
       .on('get', this.getPm.bind(this));
+
+    this.powerState$
+      .subscribe((state) => {
+        this.airPurifierService.updateCharacteristic(this.platform.Characteristic.CurrentAirPurifierState, state * 2);
+      });
 
 
     this.pm$
@@ -143,10 +130,7 @@ export class ExamplePlatformAccessory {
         this.airQualityservice.updateCharacteristic(this.platform.Characteristic.PM2_5Density, this.pm);
       });
 
-    this.powerState$
-      .subscribe((state) => {
-        this.airPurifierService.updateCharacteristic(this.platform.Characteristic.CurrentAirPurifierState, state * 2);
-      });
+
   }
 
   getAirQuality(callback: CharacteristicGetCallback) {
@@ -160,12 +144,12 @@ export class ExamplePlatformAccessory {
   setOn(value: CharacteristicValue, callback: CharacteristicSetCallback) {
     this.mqtt.publish('purifier/app/switch/' + this.platform.userNo, {
       deviceNo: this.accessory.context.device.deviceId,
-      language: 'en',
-      openId: '4CA90DA0',
+      language: this.platform.language,
+      openId: this.accessory.context.device.factoryId,
       order: Commands.sendPower,
       paramCode: value === SwitchState.ON ? PowerState.ON : PowerState.OFF,
       smartCode: '00',
-      productId: '92AD88F0',
+      productId: this.accessory.context.device.productId,
     });
     console.log('Set Characteristic On ->', value);
     this.powerState$.next(this.powerState = value as number * 2);
@@ -194,7 +178,7 @@ export class ExamplePlatformAccessory {
     // you must call the callback function
     // the first argument should be null if there were no errors
     // the second argument should be the value to return
-    callback(null, this.powerState*2);
+    callback(null, this.powerState * 2);
   }
 
   getPm(callback: CharacteristicGetCallback) {
@@ -202,59 +186,5 @@ export class ExamplePlatformAccessory {
     callback(null, this.pm);
   }
 
-  /**
-   * Handle requests to get the current value of the "Active" characteristic
-   */
-  handleActiveGet(callback) {
-    this.log.debug('Triggered GET Active');
-
-    // set this to a valid value for Active
-    const currentValue = 1;
-
-    callback(null, currentValue);
-  }
-
-  /**
-   * Handle requests to set the "Active" characteristic
-   */
-  handleActiveSet(value, callback) {
-    this.log.debug('Triggered SET Active:', value);
-
-    callback(null);
-  }
-
-  /**
-   * Handle requests to get the current value of the "Current Air Purifier State" characteristic
-   */
-  handleCurrentAirPurifierStateGet(callback) {
-    this.log.debug('Triggered GET CurrentAirPurifierState');
-
-    // set this to a valid value for CurrentAirPurifierState
-    const currentValue = 1;
-
-    callback(null, currentValue);
-  }
-
-
-  /**
-   * Handle requests to get the current value of the "Target Air Purifier State" characteristic
-   */
-  handleTargetAirPurifierStateGet(callback) {
-    this.log.debug('Triggered GET TargetAirPurifierState');
-
-    // set this to a valid value for TargetAirPurifierState
-    const currentValue = 1;
-
-    callback(null, currentValue);
-  }
-
-  /**
-   * Handle requests to set the "Target Air Purifier State" characteristic
-   */
-  handleTargetAirPurifierStateSet(value, callback) {
-    this.log.debug('Triggered SET TargetAirPurifierState:', value);
-
-    callback(null);
-  }
 
 }
