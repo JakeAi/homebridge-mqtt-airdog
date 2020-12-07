@@ -79,6 +79,7 @@ export interface ListDevicesResponse extends ApiResponse {
 export declare enum Commands {
     'sendPower' = "sendPower",
     'changeSpeed' = "changeSpeed",
+    'sendSpeed' = "sendSpeed",
     'getAll' = "getAll",
     'sendChildrenLock' = "sendChildrenLock"
 }

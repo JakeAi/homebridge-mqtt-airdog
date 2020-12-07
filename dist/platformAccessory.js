@@ -132,6 +132,31 @@ class ExamplePlatformAccessory {
         callback(null, this.fanSpeed);
     }
     setRotationSpeed(value, callback) {
+        let fanState;
+        if (value === 0) {
+            fanState = common_1.FanState.LOW;
+        }
+        if (value === 1) {
+            fanState = common_1.FanState.MED;
+        }
+        if (value === 2) {
+            fanState = common_1.FanState.HIGH;
+        }
+        if (value === 3) {
+            fanState = common_1.FanState.MAX;
+        }
+        console.log('Set Characteristic RotationSpeed ->', value);
+        this.mqtt.publish('purifier/app/changeSpeed/1058' + this.platform.userNo, {
+            deviceNo: this.accessory.context.device.deviceId,
+            language: this.platform.language,
+            openId: this.accessory.context.device.factoryId,
+            order: common_1.Commands.sendSpeed,
+            paramCode: fanState,
+            smartCode: '00',
+            productId: this.accessory.context.device.productId,
+        });
+        this.powerState$.next(this.powerState = value * 2);
+        // you must call the callback function
         callback(null);
     }
     getAirQuality(callback) {
@@ -142,14 +167,10 @@ class ExamplePlatformAccessory {
      * These are sent when the user changes the state of an accessory, for example, turning on a Light bulb.
      */
     setOn(value, callback) {
-        console.log({
-            powerState: this.powerState,
-            value,
-            Active: this.airPurifierService.getCharacteristic(this.platform.Characteristic.Active).value,
-            CurrentAirPurifierState: this.airPurifierService.getCharacteristic(this.platform.Characteristic.CurrentAirPurifierState).value,
-        });
         if (this.powerState && value && this.airPurifierService.getCharacteristic(this.platform.Characteristic.Active).value) {
+            return callback();
         }
+        console.log('Set Characteristic On ->', value);
         this.mqtt.publish('purifier/app/switch/' + this.platform.userNo, {
             deviceNo: this.accessory.context.device.deviceId,
             language: this.platform.language,
@@ -159,7 +180,6 @@ class ExamplePlatformAccessory {
             smartCode: '00',
             productId: this.accessory.context.device.productId,
         });
-        console.log('Set Characteristic On ->', value);
         this.powerState$.next(this.powerState = value * 2);
         // you must call the callback function
         callback(null);

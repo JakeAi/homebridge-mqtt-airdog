@@ -24,6 +24,7 @@ var Commands;
 (function (Commands) {
     Commands["sendPower"] = "sendPower";
     Commands["changeSpeed"] = "changeSpeed";
+    Commands["sendSpeed"] = "sendSpeed";
     Commands["getAll"] = "getAll";
     Commands["sendChildrenLock"] = "sendChildrenLock";
 })(Commands = exports.Commands || (exports.Commands = {}));
