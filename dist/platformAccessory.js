@@ -29,6 +29,8 @@ class ExamplePlatformAccessory {
         this.pm$ = new rxjs_1.BehaviorSubject(0);
         this.airQuality = 0;
         this.airQuality$ = new rxjs_1.BehaviorSubject(0);
+        this.fanSpeed = 0;
+        this.fanSpeed$ = new rxjs_1.BehaviorSubject('speed auto');
         // set accessory information
         this.accessory.getService(this.platform.Service.AccessoryInformation)
             .setCharacteristic(this.platform.Characteristic.Manufacturer, settings_1.MANUFACTURER)
@@ -56,16 +58,21 @@ class ExamplePlatformAccessory {
             .on('set', this.setOn.bind(this))
             .on('get', this.getOn.bind(this));
         this.airPurifierService.getCharacteristic(this.platform.Characteristic.RotationSpeed)
-            .on('set', this.setOn.bind(this))
-            .on('get', this.getOn.bind(this));
+            .setProps({
+            maxValue: 4,
+            minValue: 0,
+            minStep: 1,
+        })
+            .on('set', this.setRotationSpeed.bind(this))
+            .on('get', this.getRotationSpeed.bind(this));
         this.mqtt.register('purifier/server/app/sendPm/' + this.accessory.context.device.deviceId)
             .pipe(operators_1.debounceTime(3000), operators_1.tap(date => console.log({ date })))
             .subscribe((d) => {
-            var _a, _b, _c, _d;
+            var _a, _b, _c;
             this.powerState = ((_a = d === null || d === void 0 ? void 0 : d.power) === null || _a === void 0 ? void 0 : _a.indexOf('open')) !== -1 ? common_1.SwitchState.ON : common_1.SwitchState.OFF;
             this.lockState = ((_b = d === null || d === void 0 ? void 0 : d.children) === null || _b === void 0 ? void 0 : _b.indexOf('open')) !== -1 ? common_1.SwitchState.ON : common_1.SwitchState.OFF;
             this.fanState = ((_c = d === null || d === void 0 ? void 0 : d.speed) === null || _c === void 0 ? void 0 : _c.indexOf('auto')) !== -1 ? common_1.FanState.AUTO : common_1.FanState.LOW;
-            this.fanState = ((_d = d === null || d === void 0 ? void 0 : d.speed) === null || _d === void 0 ? void 0 : _d.indexOf('auto')) !== -1 ? common_1.FanState.AUTO : common_1.FanState.LOW;
+            this.fanSpeed$.next(d === null || d === void 0 ? void 0 : d.speed);
             this.powerState$.next(this.powerState);
             this.lockState$.next(this.lockState);
             this.fanState$.next(this.fanState);
@@ -80,6 +87,23 @@ class ExamplePlatformAccessory {
         this.powerState$
             .subscribe((state) => {
             this.airPurifierService.updateCharacteristic(this.platform.Characteristic.CurrentAirPurifierState, state * 2);
+        });
+        this.fanSpeed$
+            .subscribe((state) => {
+            if (state.indexOf('one') !== -1) {
+                this.fanSpeed = 0;
+            }
+            if (state.indexOf('two') !== -1) {
+                this.fanSpeed = 1;
+            }
+            if (state.indexOf('three') !== -1) {
+                this.fanSpeed = 2;
+            }
+            if (state.indexOf('four') !== -1) {
+                this.fanSpeed = 3;
+            }
+            this.fanSpeed = 0;
+            this.airPurifierService.updateCharacteristic(this.platform.Characteristic.RotationSpeed, this.fanSpeed);
         });
         this.pm$
             .subscribe((pm) => {
@@ -104,6 +128,12 @@ class ExamplePlatformAccessory {
             this.airQualityservice.updateCharacteristic(this.platform.Characteristic.AirQuality, this.airQuality);
             this.airQualityservice.updateCharacteristic(this.platform.Characteristic.PM2_5Density, this.pm);
         });
+    }
+    getRotationSpeed(callback) {
+        callback(null, this.fanSpeed);
+    }
+    setRotationSpeed(value, callback) {
+        callback(null);
     }
     getAirQuality(callback) {
         callback(null, this.airQuality);

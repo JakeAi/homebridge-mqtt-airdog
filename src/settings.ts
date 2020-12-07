@@ -7,4 +7,4 @@ export const PLATFORM_NAME = 'Airdog';
  * This must match the name of your plugin as defined the package.json
  */
 export const PLUGIN_NAME = 'homebridge-mqtt-airdog';
-  export const MANUFACTURER = 'Silicon Valley Air Experts';
+export const MANUFACTURER = 'Silicon Valley Air Experts';

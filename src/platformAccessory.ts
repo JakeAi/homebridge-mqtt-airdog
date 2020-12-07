@@ -35,6 +35,10 @@ export class ExamplePlatformAccessory {
   private airQuality: number = 0;
   private airQuality$: BehaviorSubject<number> = new BehaviorSubject<number>(0);
 
+
+  private fanSpeed: number = 0;
+  private fanSpeed$: BehaviorSubject<string> = new BehaviorSubject<string>('speed auto');
+
   constructor(
     private  platform: AirdogPlatform,
     private  accessory: DevicePlatformAccessory,
@@ -78,8 +82,13 @@ export class ExamplePlatformAccessory {
       .on('get', this.getOn.bind(this));
 
     this.airPurifierService.getCharacteristic(this.platform.Characteristic.RotationSpeed)
-      .on('set', this.setOn.bind(this))
-      .on('get', this.getOn.bind(this));
+      .setProps({
+        maxValue: 4,
+        minValue: 0,
+        minStep: 1,
+      })
+      .on('set', this.setRotationSpeed.bind(this))
+      .on('get', this.getRotationSpeed.bind(this));
 
     this.mqtt.register<SendPm>('purifier/server/app/sendPm/' + this.accessory.context.device.deviceId)
       .pipe(
@@ -90,8 +99,8 @@ export class ExamplePlatformAccessory {
         this.powerState = d?.power?.indexOf('open') !== -1 ? SwitchState.ON : SwitchState.OFF;
         this.lockState = d?.children?.indexOf('open') !== -1 ? SwitchState.ON : SwitchState.OFF;
         this.fanState = d?.speed?.indexOf('auto') !== -1 ? FanState.AUTO : FanState.LOW;
-        this.fanState = d?.speed?.indexOf('auto') !== -1 ? FanState.AUTO : FanState.LOW;
 
+        this.fanSpeed$.next(d?.speed);
         this.powerState$.next(this.powerState);
         this.lockState$.next(this.lockState);
         this.fanState$.next(this.fanState);
@@ -114,6 +123,18 @@ export class ExamplePlatformAccessory {
       });
 
 
+    this.fanSpeed$
+      .subscribe((state) => {
+        if (state.indexOf('one') !== -1) { this.fanSpeed = 0; }
+        if (state.indexOf('two') !== -1) { this.fanSpeed = 1; }
+        if (state.indexOf('three') !== -1) { this.fanSpeed = 2; }
+        if (state.indexOf('four') !== -1) { this.fanSpeed = 3; }
+
+        this.fanSpeed = 0;
+        this.airPurifierService.updateCharacteristic(this.platform.Characteristic.RotationSpeed, this.fanSpeed);
+      });
+
+
     this.pm$
       .subscribe((pm) => {
         let airQualityLevel = 0;
@@ -131,6 +152,14 @@ export class ExamplePlatformAccessory {
       });
 
 
+  }
+
+  getRotationSpeed(callback: CharacteristicGetCallback) {
+    callback(null, this.fanSpeed);
+  }
+
+  setRotationSpeed(value: CharacteristicValue, callback: CharacteristicSetCallback) {
+    callback(null);
   }
 
   getAirQuality(callback: CharacteristicGetCallback) {

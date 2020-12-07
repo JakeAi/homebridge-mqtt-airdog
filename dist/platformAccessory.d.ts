@@ -24,7 +24,11 @@ export declare class ExamplePlatformAccessory {
     private pm$;
     private airQuality;
     private airQuality$;
+    private fanSpeed;
+    private fanSpeed$;
     constructor(platform: AirdogPlatform, accessory: DevicePlatformAccessory, log: Logger);
+    getRotationSpeed(callback: CharacteristicGetCallback): void;
+    setRotationSpeed(value: CharacteristicValue, callback: CharacteristicSetCallback): void;
     getAirQuality(callback: CharacteristicGetCallback): void;
     /**
      * Handle "SET" requests from HomeKit
