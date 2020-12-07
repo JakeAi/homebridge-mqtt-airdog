@@ -12,8 +12,6 @@ export declare class ExamplePlatformAccessory {
     private airPurifierService;
     private airQualityservice;
     private mqtt;
-    private powerState;
-    private powerState$;
     private fanState;
     private fanState$;
     private sleepSwitchService;
@@ -25,6 +23,8 @@ export declare class ExamplePlatformAccessory {
     private airQuality$;
     private fanSpeed;
     private fanSpeed$;
+    private activeState;
+    private activeState$;
     private currentAirPurifierState;
     private currentAirPurifierState$;
     private targetAirPurifierState;

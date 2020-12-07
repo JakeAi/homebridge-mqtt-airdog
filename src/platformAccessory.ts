@@ -17,8 +17,6 @@ export class ExamplePlatformAccessory {
 
   private mqtt: MQTT = new MQTT('mqtt://47.89.244.17');
 
-  private powerState = SwitchState.OFF;
-  private powerState$: BehaviorSubject<SwitchState> = new BehaviorSubject<SwitchState>(SwitchState.OFF);
 
   private fanState = FanState.AUTO;
   private fanState$: BehaviorSubject<FanState> = new BehaviorSubject<FanState>(FanState.AUTO);
@@ -39,9 +37,11 @@ export class ExamplePlatformAccessory {
   private fanSpeed: number = 0;
   private fanSpeed$: BehaviorSubject<string> = new BehaviorSubject<string>('speed auto');
 
+  private activeState: number = 0;
+  private activeState$: BehaviorSubject<number> = new BehaviorSubject<number>(0);
 
   private currentAirPurifierState: number = 0;
-  private currentAirPurifierState$: BehaviorSubject<string> = new BehaviorSubject<string>('speed auto');
+  private currentAirPurifierState$: BehaviorSubject<number> = new BehaviorSubject<number>(0);
 
   private targetAirPurifierState: number = 0;
   private targetAirPurifierState$: BehaviorSubject<number> = new BehaviorSubject<number>(0);
@@ -133,13 +133,13 @@ export class ExamplePlatformAccessory {
   }
 
   getActive(callback: CharacteristicGetCallback) {
-    this.platform.log.debug('Get Characteristic On ->', this.powerState);
-    callback(null, this.powerState * 2);
+    this.platform.log.debug('Get Characteristic On ->', this.activeState);
+    callback(null, this.currentAirPurifierState);
   }
 
   setActive(value: CharacteristicValue, callback: CharacteristicSetCallback) {
     console.log('Set Characteristic Active ->', value);
-    if (this.powerState && value && this.airPurifierService.getCharacteristic(this.platform.Characteristic.Active).value) { return callback(); }
+    if (this.currentAirPurifierState && value && this.airPurifierService.getCharacteristic(this.platform.Characteristic.Active).value) { return callback(); }
     this.mqtt.publish('purifier/app/switch/' + this.platform.userNo, {
       deviceNo: this.accessory.context.device.deviceId,
       language: this.platform.language,
@@ -149,7 +149,8 @@ export class ExamplePlatformAccessory {
       smartCode: '00',
       productId: this.accessory.context.device.productId,
     });
-    this.powerState$.next(this.powerState = value as number * 2);
+    this.activeState = value as number;
+    this.activeState$.next(this.activeState);
     // you must call the callback function
     callback(null);
   }
@@ -213,17 +214,23 @@ export class ExamplePlatformAccessory {
       smartCode: '00',
       productId: this.accessory.context.device.productId,
     });
-    this.powerState$.next(this.powerState = value as number * 2);
     // you must call the callback function
     callback(null);
   }
 
   private setupSubscribers() {
 
-    this.powerState$
-      .subscribe((state) => {
-        this.airPurifierService.updateCharacteristic(this.platform.Characteristic.CurrentAirPurifierState, state * 2);
-      });
+    this.activeState$
+      .subscribe((state) => this.airPurifierService.updateCharacteristic(this.platform.Characteristic.Active, state));
+
+    this.currentAirPurifierState$
+      .subscribe((state) => this.airPurifierService.updateCharacteristic(this.platform.Characteristic.CurrentAirPurifierState, state * 2));
+
+    this.targetAirPurifierState$
+      .subscribe((target) => this.airPurifierService.updateCharacteristic(this.platform.Characteristic.TargetAirPurifierState, target));
+
+    this.lockPhysicalControlsState$
+      .subscribe((switchState) => this.airPurifierService.updateCharacteristic(this.platform.Characteristic.LockPhysicalControls, switchState));
 
 
     this.fanSpeed$
@@ -268,11 +275,6 @@ export class ExamplePlatformAccessory {
         this.airQualityservice.updateCharacteristic(this.platform.Characteristic.PM2_5Density, this.pm);
       });
 
-    this.targetAirPurifierState$
-      .subscribe((target) => this.airPurifierService.updateCharacteristic(this.platform.Characteristic.TargetAirPurifierState, target));
-
-    this.lockPhysicalControlsState$
-      .subscribe((switchState) => this.airPurifierService.updateCharacteristic(this.platform.Characteristic.LockPhysicalControls, switchState));
   }
 
   private setupRegisters() {
@@ -284,8 +286,8 @@ export class ExamplePlatformAccessory {
       )
       .subscribe((d) => {
 
-        this.powerState = (d.power || '').indexOf('open') !== -1 ? SwitchState.ON : SwitchState.OFF;
-        this.powerState$.next(this.powerState);
+        this.currentAirPurifierState = (d.power || '').indexOf('open') !== -1 ? SwitchState.ON : SwitchState.OFF;
+        this.currentAirPurifierState$.next(this.currentAirPurifierState * 2);
 
         this.targetAirPurifierState = (d.speed || '').indexOf('auto') !== -1 ? this.platform.Characteristic.TargetAirPurifierState.AUTO : this.platform.Characteristic.TargetAirPurifierState.MANUAL;
         this.targetAirPurifierState$.next(this.targetAirPurifierState);
