@@ -68,10 +68,9 @@ class ExamplePlatformAccessory {
         this.mqtt.register('purifier/server/app/sendPm/' + this.accessory.context.device.deviceId)
             .pipe(operators_1.debounceTime(3000), operators_1.tap(date => console.log({ date })))
             .subscribe((d) => {
-            var _a, _b, _c;
-            this.powerState = ((_a = d === null || d === void 0 ? void 0 : d.power) === null || _a === void 0 ? void 0 : _a.indexOf('open')) !== -1 ? common_1.SwitchState.ON : common_1.SwitchState.OFF;
-            this.lockState = ((_b = d === null || d === void 0 ? void 0 : d.children) === null || _b === void 0 ? void 0 : _b.indexOf('open')) !== -1 ? common_1.SwitchState.ON : common_1.SwitchState.OFF;
-            this.fanState = ((_c = d === null || d === void 0 ? void 0 : d.speed) === null || _c === void 0 ? void 0 : _c.indexOf('auto')) !== -1 ? common_1.FanState.AUTO : common_1.FanState.LOW;
+            this.powerState = (d.power || '').indexOf('open') !== -1 ? common_1.SwitchState.ON : common_1.SwitchState.OFF;
+            this.lockState = (d.children || '').indexOf('open') !== -1 ? common_1.SwitchState.ON : common_1.SwitchState.OFF;
+            this.fanState = (d.speed || '').indexOf('auto') !== -1 ? common_1.FanState.AUTO : common_1.FanState.LOW;
             this.fanSpeed$.next(d === null || d === void 0 ? void 0 : d.speed);
             this.powerState$.next(this.powerState);
             this.lockState$.next(this.lockState);
@@ -143,6 +142,14 @@ class ExamplePlatformAccessory {
      * These are sent when the user changes the state of an accessory, for example, turning on a Light bulb.
      */
     setOn(value, callback) {
+        console.log({
+            powerState: this.powerState,
+            value,
+            Active: this.airPurifierService.getCharacteristic(this.platform.Characteristic.Active).value,
+            CurrentAirPurifierState: this.airPurifierService.getCharacteristic(this.platform.Characteristic.CurrentAirPurifierState).value,
+        });
+        if (this.powerState && value && this.airPurifierService.getCharacteristic(this.platform.Characteristic.Active).value) {
+        }
         this.mqtt.publish('purifier/app/switch/' + this.platform.userNo, {
             deviceNo: this.accessory.context.device.deviceId,
             language: this.platform.language,
