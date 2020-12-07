@@ -2,6 +2,7 @@ export declare enum PowerState {
     OFF = "00",
     ON = "01"
 }
+export declare const LockState: typeof PowerState;
 export declare enum SwitchState {
     OFF = 0,
     ON = 1

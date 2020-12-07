@@ -3,6 +3,9 @@ export enum PowerState {
   ON = '01'
 }
 
+export const LockState = PowerState;
+
+
 export enum SwitchState {
   OFF,
   ON

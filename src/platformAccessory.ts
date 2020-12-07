@@ -2,7 +2,7 @@ import { CharacteristicGetCallback, CharacteristicSetCallback, CharacteristicVal
 import { AirdogPlatform, DevicePlatformAccessory } from './platform';
 import { MANUFACTURER } from './settings';
 import { MQTT } from './mqtt';
-import { Commands, FanState, PowerState, SendPm, SwitchState } from './common';
+import { Commands, FanState, LockState, PowerState, SendPm, SwitchState } from './common';
 import { BehaviorSubject } from 'rxjs';
 import { debounceTime, tap } from 'rxjs/operators';
 
@@ -29,9 +29,6 @@ export class ExamplePlatformAccessory {
   private sleepSwitchState$: BehaviorSubject<SwitchState> = new BehaviorSubject<SwitchState>(SwitchState.OFF);
 
 
-  private lockState = SwitchState.OFF;
-  private lockState$: BehaviorSubject<SwitchState> = new BehaviorSubject<SwitchState>(SwitchState.OFF);
-
   private pm: number = 0;
   private pm$: BehaviorSubject<number> = new BehaviorSubject<number>(0);
 
@@ -47,7 +44,7 @@ export class ExamplePlatformAccessory {
   private currentAirPurifierState$: BehaviorSubject<string> = new BehaviorSubject<string>('speed auto');
 
   private targetAirPurifierState: number = 0;
-  private targetAirPurifierState$: BehaviorSubject<string> = new BehaviorSubject<string>('speed auto');
+  private targetAirPurifierState$: BehaviorSubject<number> = new BehaviorSubject<number>(0);
 
   private lockPhysicalControlsService: Service;
   private lockPhysicalControlsState: SwitchState = SwitchState.OFF;
@@ -157,7 +154,7 @@ export class ExamplePlatformAccessory {
     callback(null);
   }
 
-  getCurrentAirPurifierState(callback: CharacteristicGetCallback) { return callback(null, this.currentAirPurifierState); }
+  getCurrentAirPurifierState(callback: CharacteristicGetCallback) { return callback(null, this.currentAirPurifierState * 2); }
 
   setCurrentAirPurifierState(value: CharacteristicValue, callback: CharacteristicSetCallback) {
     console.log('Set Characteristic CurrentAirPurifierState ->', value);
@@ -173,6 +170,17 @@ export class ExamplePlatformAccessory {
 
   setLockPhysicalControls(value: CharacteristicValue, callback: CharacteristicSetCallback) {
     console.log('Set Characteristic LockPhysicalControls ->', value);
+
+    this.mqtt.publish('purifier/app/switch/' + this.platform.userNo, {
+      deviceNo: this.accessory.context.device.deviceId,
+      language: this.platform.language,
+      openId: this.accessory.context.device.factoryId,
+      order: Commands.sendChildrenLock,
+      paramCode: value === SwitchState.ON ? LockState.ON : LockState.OFF,
+      smartCode: '00',
+      productId: this.accessory.context.device.productId,
+    });
+    callback(null);
   }
 
   getAirQuality(callback: CharacteristicGetCallback) { return callback(null, this.airQuality); }
@@ -211,6 +219,7 @@ export class ExamplePlatformAccessory {
   }
 
   private setupSubscribers() {
+
     this.powerState$
       .subscribe((state) => {
         this.airPurifierService.updateCharacteristic(this.platform.Characteristic.CurrentAirPurifierState, state * 2);
@@ -219,13 +228,27 @@ export class ExamplePlatformAccessory {
 
     this.fanSpeed$
       .subscribe((state) => {
-        if (state.indexOf('one') !== -1) { this.fanSpeed = 0; }
-        if (state.indexOf('two') !== -1) { this.fanSpeed = 1; }
-        if (state.indexOf('three') !== -1) { this.fanSpeed = 2; }
-        if (state.indexOf('four') !== -1) { this.fanSpeed = 3; }
 
-        this.fanSpeed = 0;
+        let targetState = this.platform.Characteristic.TargetAirPurifierState.MANUAL, fanSpeed;
+
+        if (state.indexOf('one') !== -1) {
+          fanSpeed = 0;
+        } else if (state.indexOf('two') !== -1) {
+          fanSpeed = 1;
+        } else if (state.indexOf('three') !== -1) {
+          fanSpeed = 2;
+        } else if (state.indexOf('four') !== -1) {
+          fanSpeed = 3;
+        } else if (state.indexOf('auto') !== -1) {
+          targetState = this.platform.Characteristic.TargetAirPurifierState.AUTO;
+        } else if (state.indexOf('sleep') !== -1) {
+          targetState = this.platform.Characteristic.TargetAirPurifierState.AUTO;
+        }
+
+        this.fanSpeed = fanSpeed;
         this.airPurifierService.updateCharacteristic(this.platform.Characteristic.RotationSpeed, this.fanSpeed);
+        this.airPurifierService.updateCharacteristic(this.platform.Characteristic.TargetAirPurifierState, targetState);
+
       });
 
 
@@ -244,6 +267,12 @@ export class ExamplePlatformAccessory {
         this.airQualityservice.updateCharacteristic(this.platform.Characteristic.AirQuality, this.airQuality);
         this.airQualityservice.updateCharacteristic(this.platform.Characteristic.PM2_5Density, this.pm);
       });
+
+    this.targetAirPurifierState$
+      .subscribe((target) => this.airPurifierService.updateCharacteristic(this.platform.Characteristic.TargetAirPurifierState, target));
+
+    this.lockPhysicalControlsState$
+      .subscribe((switchState) => this.airPurifierService.updateCharacteristic(this.platform.Characteristic.LockPhysicalControls, switchState));
   }
 
   private setupRegisters() {
@@ -254,16 +283,25 @@ export class ExamplePlatformAccessory {
         tap(date => console.log({ date })),
       )
       .subscribe((d) => {
-        this.powerState = (d.power || '').indexOf('open') !== -1 ? SwitchState.ON : SwitchState.OFF;
-        this.lockState = (d.children || '').indexOf('open') !== -1 ? SwitchState.ON : SwitchState.OFF;
-        this.fanState = (d.speed || '').indexOf('auto') !== -1 ? FanState.AUTO : FanState.LOW;
 
-        this.fanSpeed$.next(d?.speed);
+        this.powerState = (d.power || '').indexOf('open') !== -1 ? SwitchState.ON : SwitchState.OFF;
         this.powerState$.next(this.powerState);
-        this.lockState$.next(this.lockState);
+
+        this.targetAirPurifierState = (d.speed || '').indexOf('auto') !== -1 ? this.platform.Characteristic.TargetAirPurifierState.AUTO : this.platform.Characteristic.TargetAirPurifierState.MANUAL;
+        this.targetAirPurifierState$.next(this.targetAirPurifierState);
+
+        this.lockPhysicalControlsState = (d.children || '').indexOf('open') !== -1 ? SwitchState.ON : SwitchState.OFF;
+        this.lockPhysicalControlsState$.next(this.lockPhysicalControlsState);
+
+        this.sleepSwitchState = (d.speed || '').indexOf('sleep') !== -1 ? SwitchState.ON : SwitchState.OFF;
+        this.sleepSwitchState$.next(this.sleepSwitchState);
+
+        this.fanState = (d.speed || '').indexOf('auto') !== -1 ? FanState.AUTO : FanState.LOW;
+        this.fanSpeed$.next(d?.speed);
         this.fanState$.next(this.fanState);
 
-        this.pm$.next(parseFloat(d?.pm));
+        this.pm = parseFloat(d?.pm);
+        this.pm$.next(this.pm);
       });
   }
 

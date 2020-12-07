@@ -1,11 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Commands = exports.FanState = exports.SwitchState = exports.PowerState = void 0;
+exports.Commands = exports.FanState = exports.SwitchState = exports.LockState = exports.PowerState = void 0;
 var PowerState;
 (function (PowerState) {
     PowerState["OFF"] = "00";
     PowerState["ON"] = "01";
 })(PowerState = exports.PowerState || (exports.PowerState = {}));
+exports.LockState = PowerState;
 var SwitchState;
 (function (SwitchState) {
     SwitchState[SwitchState["OFF"] = 0] = "OFF";

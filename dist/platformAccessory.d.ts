@@ -19,8 +19,6 @@ export declare class ExamplePlatformAccessory {
     private sleepSwitchService;
     private sleepSwitchState;
     private sleepSwitchState$;
-    private lockState;
-    private lockState$;
     private pm;
     private pm$;
     private airQuality;
